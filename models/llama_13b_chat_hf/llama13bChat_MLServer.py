@@ -5,7 +5,7 @@ import transformers
 import torch
 from pydantic import BaseModel
 from typing import Optional
-# from accelerate import infer_auto_device_map
+#from accelerate import infer_auto_device_map
 
 
 #Enter your local directory wehre the model is stored
