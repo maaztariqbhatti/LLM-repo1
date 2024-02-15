@@ -70,11 +70,11 @@ def loadLLM():
             do_sample = True,
             top_k = 5,
             num_return_sequences = 1,
-            max_length = 4000,
+            max_length = 8000,
             eos_token_id = local_tokenizer.eos_token_id
         )
 
-    chatModel= HuggingFacePipeline(pipeline=pipeline, model_kwargs={'temperature':0.4})
+    chatModel= HuggingFacePipeline(pipeline=pipeline, model_kwargs={'temperature':0.2})
 
     return chatModel
 torch.cuda.empty_cache()
