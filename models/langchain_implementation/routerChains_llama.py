@@ -70,10 +70,12 @@ def loadLLM():
             do_sample = True,
             top_k = 5,
             num_return_sequences = 1,
+            max_length = 4000,
             eos_token_id = local_tokenizer.eos_token_id
         )
 
     chatModel= HuggingFacePipeline(pipeline=pipeline, model_kwargs={'temperature':0.4})
+
     return chatModel
 chatModel = loadLLM()
 class DKMultiPromptChain (MultiRouteChain):
@@ -365,8 +367,8 @@ if __name__ == "__main__":
     #                                 _dateTo = "2023-10-19 23:58:47+00:00")
 
     langChain_analysis = LangChain_analysis(_dataPath = dataPath,
-                                _dateFrom = "2023-10-19 21:06:21+00:00",
-                                _dateTo = "2023-10-19 23:58:47+00:00")
+                                _dateFrom = "2023-10-2 21:06:21+00:00",
+                                _dateTo = "2023-10-3 23:58:47+00:00")
 
     # question = "Which places/location's recieved a flood warning or evacuation orders? Which places are affected by floods"
     # output = langChain_analysis.predictions_response(question)
