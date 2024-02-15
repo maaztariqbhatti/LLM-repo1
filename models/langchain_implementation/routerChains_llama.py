@@ -146,14 +146,14 @@ class PromptFactory():
 
     prompt_infos = [
         {
-            'name': 'location_extractor',
-            'description': 'Good for extracting locations from a context',
-            'prompt_template': location_template
-        },
-        {
             'name': 'casualties_detector',
             'description': 'Good for summing up the number of casualties such as deaths and injuries',
             'prompt_template': human_template
+        },
+        {
+            'name': 'location_extractor',
+            'description': 'Good for extracting locations from a context',
+            'prompt_template': location_template
         }
 
     ]
