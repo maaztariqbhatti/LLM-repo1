@@ -38,7 +38,6 @@ folium==0.15.1
 fonttools==4.47.2
 frozenlist==1.4.1
 fsspec==2023.10.0
-GDAL==3.8.3
 geopandas==0.14.2
 gitdb==4.0.11
 GitPython==3.1.41
@@ -106,7 +105,6 @@ pillow==10.2.0
 pip==23.3.2
 posthog==3.3.2
 protobuf==4.25.2
-psycopg2==2.9.9
 pulsar-client==3.4.0
 pyarrow==14.0.2
 pyarrow-hotfix==0.6
