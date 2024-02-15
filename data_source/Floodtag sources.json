@@ -1,0 +1,1007 @@
+{
+  "status": "success",
+  "errors": [],
+  "data": {
+    "sources": [
+      {
+        "id": "english-flood",
+        "name": "English",
+        "language": "en",
+        "type": "twitter",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "english-wildfire",
+        "name": "English Wildfire",
+        "language": "en",
+        "type": "twitter",
+        "filters": {
+          "tags": []
+        }
+      },
+      {
+        "id": "france",
+        "name": "French",
+        "language": "fr",
+        "type": "twitter",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "philippines-flood",
+        "name": "Tagalog",
+        "language": "tl",
+        "type": "twitter",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "indonesian-flood",
+        "name": "Indonesian",
+        "language": "id",
+        "type": "twitter",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "japanese-flood",
+        "name": "Japanese",
+        "language": "ja",
+        "type": "twitter",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "portugal",
+        "name": "Portuguese",
+        "language": "pt",
+        "type": "twitter",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "spain",
+        "name": "Spanish",
+        "language": "es",
+        "type": "twitter",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "swahili",
+        "name": "Swahili",
+        "language": "sw",
+        "type": "twitter",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "english-flood-news",
+        "name": "English News",
+        "language": "en",
+        "type": "news",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "french-flood-news",
+        "name": "French news",
+        "language": "fr",
+        "type": "news",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "indonesian-flood-news",
+        "name": "Bahasa news",
+        "language": "id",
+        "type": "news",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "japanese-flood-news",
+        "name": "Japanese news",
+        "language": "ja",
+        "type": "news",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "spanish-flood-news",
+        "name": "Spanish news",
+        "language": "es",
+        "type": "news",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "portuguese-flood-news",
+        "name": "Portuguese news",
+        "language": "pt",
+        "type": "news",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "english-flood-youtube",
+        "name": "English YouTube",
+        "language": "en",
+        "type": "youtube",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "french-flood-youtube",
+        "name": "French YouTube",
+        "language": "fr",
+        "type": "youtube",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "indonesian-flood-youtube",
+        "name": "Bahasa YouTube",
+        "language": "id",
+        "type": "youtube",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "japanese-flood-youtube",
+        "name": "Japanese YouTube",
+        "language": "ja",
+        "type": "youtube",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "spanish-flood-youtube",
+        "name": "Spanish YouTube",
+        "language": "es",
+        "type": "youtube",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "portuguese-flood-youtube",
+        "name": "Portuguese YouTube",
+        "language": "pt",
+        "type": "youtube",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "tagalog-flood-youtube",
+        "name": "Tagalog YouTube",
+        "language": "tl",
+        "type": "youtube",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      },
+      {
+        "id": "swahili-flood-youtube",
+        "name": "Swahili YouTube",
+        "language": "sw",
+        "type": "youtube",
+        "filters": {
+          "tags": [
+            {
+              "id": "only_detailed_locations",
+              "name": "Only Detailed Locations",
+              "description": "Shown only tags and their locations if these locations are at city level or more detailed"
+            },
+            {
+              "id": "high_keyword_score",
+              "name": "Event Related",
+              "description": "Shows only Tags about ongoing events (floods, storms etc..), based on keyword analysis"
+            },
+            {
+              "id": "top_keyword_score",
+              "name": "Top Ranked",
+              "description": "Shows only Tags that have a very high score, based on keyword analysis"
+            },
+            {
+              "id": "class:flood-logistics",
+              "name": "Flood Logistics",
+              "description": "Tags about the effects of flooding on infrastructure & logistics"
+            },
+            {
+              "id": "class:flood-affected",
+              "name": "Flood Affected",
+              "description": "Tags about people or assets affected by flooding"
+            },
+            {
+              "id": "class:flood-forecast",
+              "name": "Flood Forecasts",
+              "description": "Tags discussing flood forecasts"
+            },
+            {
+              "id": "with_flood_related_photos",
+              "name": "With Flood Photos",
+              "description": "Shows only tags that have one or more images that were classified as flood related by machine learning"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
