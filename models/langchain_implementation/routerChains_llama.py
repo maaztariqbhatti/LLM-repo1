@@ -41,38 +41,41 @@ import transformers
 from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
 
 dataPath = "FSD1777_Oct23.json"
-dotenv.load_dotenv()
 
+dotenv.load_dotenv()
 # chatModel = ChatOpenAI()
 
 #Llama 2
-#Enter your local directory wehre the model is stored
-save_path = "/home/mbhatti/mnt/d/Llama-2-13b-chat-hf"
+@st.cache_resource
+def loadLLM():
+    #Enter your local directory wehre the model is stored
+    save_path = "/home/mbhatti/mnt/d/Llama-2-13b-chat-hf"
 
-#Empty cuda cache
-torch.cuda.empty_cache()
-torch.backends.cuda.enable_mem_efficient_sdp(False)
-torch.backends.cuda.enable_flash_sdp(False)
-
-
-#Call the model and tokenizer from local storage
-local_model = AutoModelForCausalLM.from_pretrained(save_path, return_dict=True, trust_remote_code=True, device_map="auto",torch_dtype=torch.bfloat16).to("cuda")
-local_tokenizer = AutoTokenizer.from_pretrained(save_path)
+    #Empty cuda cache
+    torch.cuda.empty_cache()
+    torch.backends.cuda.enable_mem_efficient_sdp(False)
+    torch.backends.cuda.enable_flash_sdp(False)
 
 
-pipeline = transformers.pipeline(
-        "text-generation",
-        model = local_model,
-        tokenizer = local_tokenizer,
-        torch_dtype = torch.bfloat16,
-        do_sample = True,
-        top_k = 5,
-        num_return_sequences = 1,
-        eos_token_id = local_tokenizer.eos_token_id
-    )
+    #Call the model and tokenizer from local storage
+    local_model = AutoModelForCausalLM.from_pretrained(save_path, return_dict=True, trust_remote_code=True, device_map="auto",torch_dtype=torch.bfloat16).to("cuda")
+    local_tokenizer = AutoTokenizer.from_pretrained(save_path)
 
-chatModel= HuggingFacePipeline(pipeline=pipeline, model_kwargs={'temperature':0.4})
 
+    pipeline = transformers.pipeline(
+            "text-generation",
+            model = local_model,
+            tokenizer = local_tokenizer,
+            torch_dtype = torch.bfloat16,
+            do_sample = True,
+            top_k = 5,
+            num_return_sequences = 1,
+            eos_token_id = local_tokenizer.eos_token_id
+        )
+
+    chatModel= HuggingFacePipeline(pipeline=pipeline, model_kwargs={'temperature':0.4})
+    return chatModel
+model = loadLLM()
 class DKMultiPromptChain (MultiRouteChain):
     destination_chains: Mapping[str, Chain]
     """Map of name to candidate chains that inputs can be routed to. Not restricted to LLM"""
@@ -357,14 +360,13 @@ class LangChain_analysis:
     
 if __name__ == "__main__":
 
-      
     # langChain_analysis = LangChain_analysis(_dataPath = "G:/My Drive/LLM-repo1/Floodtags_analytics/FSD1777_Oct23.json",
     #                                 _dateFrom = "2023-10-19 21:06:21+00:00",
     #                                 _dateTo = "2023-10-19 23:58:47+00:00")
 
     langChain_analysis = LangChain_analysis(_dataPath = dataPath,
-                                _dateFrom = "2023-10-2 21:06:21+00:00",
-                                _dateTo = "2023-10-3 23:58:47+00:00")
+                                _dateFrom = "2023-10-19 21:06:21+00:00",
+                                _dateTo = "2023-10-19 23:58:47+00:00")
 
     # question = "Which places/location's recieved a flood warning or evacuation orders? Which places are affected by floods"
     # output = langChain_analysis.predictions_response(question)
