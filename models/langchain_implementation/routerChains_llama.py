@@ -41,7 +41,8 @@ import transformers
 from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
 
 dataPath = "FSD1777_Oct23.json"
-# dotenv.load_dotenv()
+dotenv.load_dotenv()
+
 # chatModel = ChatOpenAI()
 
 #Llama 2
