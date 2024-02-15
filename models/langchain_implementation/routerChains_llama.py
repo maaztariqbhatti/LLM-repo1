@@ -75,7 +75,7 @@ def loadLLM():
 
     chatModel= HuggingFacePipeline(pipeline=pipeline, model_kwargs={'temperature':0.4})
     return chatModel
-model = loadLLM()
+chatModel = loadLLM()
 class DKMultiPromptChain (MultiRouteChain):
     destination_chains: Mapping[str, Chain]
     """Map of name to candidate chains that inputs can be routed to. Not restricted to LLM"""
