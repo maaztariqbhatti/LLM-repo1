@@ -326,79 +326,77 @@ if __name__ == "__main__":
                                 _dateFrom = "2023-10-2 21:06:21+00:00",
                                 _dateTo = "2023-10-3 23:58:47+00:00")
 
-    # question = "Which places/location's recieved a flood warning or evacuation orders? Which places are affected by floods"
-    # output = langChain_analysis.predictions_response(question)
-    # prompt = "Which places/location's recieved a flood warning or evacuation orders?"
-    # response = langChain_analysis.predictions_response(prompt, "bge-large-en-v1.5", "Cross-Encoder ranking")['result']
-    # print(response)
+    prompt = "How many deaths occurred due to flooding?"
+    response = langChain_analysis.predictions_response(prompt, "bge-large-en-v1.5", "Cross-Encoder ranking")['result']
+    print(response)
 
     #Streamlit
-    st.title("SNS early flood warning 🤖")
+    # st.title("SNS early flood warning 🤖")
 
-    #Side bar to select parameters
-    with st.sidebar:
-        st.write("Embedding option")
+    # #Side bar to select parameters
+    # with st.sidebar:
+    #     st.write("Embedding option")
 
-        #Select embedding model
-        k = st.number_input("Select number of documents to add inside LLM prompt", min_value= 2, max_value= 35,step=1)
+    #     #Select embedding model
+    #     k = st.number_input("Select number of documents to add inside LLM prompt", min_value= 2, max_value= 35,step=1)
 
-        eModel = st.selectbox(
-        "Embedding model",
-        ("OpenAI", "bge-large-en-v1.5"),
-        index=None, 
-        placeholder="Select embedding model...",
-        )
-        st.write('You selected:', eModel)
-        #select retrieval type
-        rType= st.selectbox(
-        "Retrieval type",
-        ("Query", "Hyde", "Cross-Encoder ranking"),
-        index=None, 
-        placeholder="Select retrieval type...",
-        )
-        st.write('You selected:', rType)
+    #     eModel = st.selectbox(
+    #     "Embedding model",
+    #     ("OpenAI", "bge-large-en-v1.5"),
+    #     index=None, 
+    #     placeholder="Select embedding model...",
+    #     )
+    #     st.write('You selected:', eModel)
+    #     #select retrieval type
+    #     rType= st.selectbox(
+    #     "Retrieval type",
+    #     ("Query", "Hyde", "Cross-Encoder ranking"),
+    #     index=None, 
+    #     placeholder="Select retrieval type...",
+    #     )
+    #     st.write('You selected:', rType)
 
-    #Predefined prompts
-    col1, col2, col3, col4 = st.columns([1,1,1,1])
-    with col1:
-        floodLoc = st.button("Find flooded locations")
-    with col2:
-        roadsClosure = st.button("Roads/transport closure")
+    # #Predefined prompts
+    # col1, col2, col3, col4 = st.columns([1,1,1,1])
+    # with col1:
+    #     floodLoc = st.button("Find flooded locations")
+    # with col2:
+    #     roadsClosure = st.button("Roads/transport closure")
 
-    st_input = st.chat_input("Talk to me")
+    # st_input = st.chat_input("Talk to me")
 
-    # Initialize chat history
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+    # # Initialize chat history
+    # if "messages" not in st.session_state:
+    #     st.session_state.messages = []
 
-    # Display chat messages from history on app rerun
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+    # # Display chat messages from history on app rerun
+    # for message in st.session_state.messages:
+    #     with st.chat_message(message["role"]):
+    #         st.markdown(message["content"])
         
-    if floodLoc == True:
-        hard_prompt = "Which places/location's received a flood warning or evacuation orders?"
-        st_input = hard_prompt
-    if roadsClosure == True:
-        st_input = "Is there a mention of closure of roads? Closure of transport services? If so where"
+    # if floodLoc == True:
+    #     hard_prompt = "Which places/location's received a flood warning or evacuation orders?"
+    #     st_input = hard_prompt
+    # if roadsClosure == True:
+    #     st_input = "Is there a mention of closure of roads? Closure of transport services? If so where"
 
-    # React to user input
-    if prompt := st_input:
-        # Display user message in chat message container
-        with st.chat_message("user"):
-            st.markdown(prompt)
-            # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": prompt})
+    # # React to user input
+    # if prompt := st_input:
+    #     # Display user message in chat message container
+    #     with st.chat_message("user"):
+    #         st.markdown(prompt)
+    #         # Add user message to chat history
+    #     st.session_state.messages.append({"role": "user", "content": prompt})
 
-        # Display assistant response in chat message container
-        with st.chat_message("assistant"):
-            with st.spinner():
-                #Chatbot response
-                response = langChain_analysis.predictions_response(prompt, eModel, rType, k)['result']
-                st.markdown(response)
+    #     # Display assistant response in chat message container
+    #     with st.chat_message("assistant"):
+    #         with st.spinner():
+    #             #Chatbot response
+    #             response = langChain_analysis.predictions_response(prompt, eModel, rType, k)['result']
+    #             st.markdown(response)
 
-        # Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": response})
+    #     # Add assistant response to chat history
+    #     st.session_state.messages.append({"role": "assistant", "content": response})
 
 
 
