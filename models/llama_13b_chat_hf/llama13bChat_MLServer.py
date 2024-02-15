@@ -13,6 +13,9 @@ save_path = "/home/mbhatti/mnt/d/Llama-2-13b-chat-hf"
 
 #Empty cuda cache
 torch.cuda.empty_cache()
+torch.backends.cuda.enable_mem_efficient_sdp(False)
+torch.backends.cuda.enable_flash_sdp(False)
+
 
 #Call the model and tokenizer from local storage
 local_model = AutoModelForCausalLM.from_pretrained(save_path, return_dict=True, trust_remote_code=True, device_map="auto",torch_dtype=torch.bfloat16).to("cuda")
