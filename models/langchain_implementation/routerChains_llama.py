@@ -77,6 +77,7 @@ def loadLLM():
     chatModel= HuggingFacePipeline(pipeline=pipeline, model_kwargs={'temperature':0.4})
 
     return chatModel
+torch.cuda.empty_cache()
 chatModel = loadLLM()
 class DKMultiPromptChain (MultiRouteChain):
     destination_chains: Mapping[str, Chain]
