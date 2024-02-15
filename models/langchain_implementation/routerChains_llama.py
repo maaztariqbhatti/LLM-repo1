@@ -68,7 +68,7 @@ def loadLLM():
             tokenizer = local_tokenizer,
             torch_dtype = torch.bfloat16,
             do_sample = True,
-            top_k = 5,
+            top_k = 3,
             num_return_sequences = 1,
             max_length = 8000,
             eos_token_id = local_tokenizer.eos_token_id
