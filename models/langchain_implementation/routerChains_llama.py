@@ -238,7 +238,6 @@ class LangChain_analysis:
         df['date'] = df['date'].astype(str)
         return df
     
-    @st.cache_resource
     def bgeEmbeddings(self):
         model_name = "BAAI/bge-large-en-v1.5"
         model_kwargs = {'device': 'cuda'}
