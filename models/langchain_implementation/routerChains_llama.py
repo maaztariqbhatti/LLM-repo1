@@ -85,10 +85,13 @@ def loadOpenAI():
 
     return chatModelOpenAI
 
+#Load the models
 # torch.cuda.empty_cache()
 chatModel = loadLlamma()
-
 chatModelOpenAI = loadOpenAI()
+
+system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
+If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."""
 
 class DKMultiPromptChain (MultiRouteChain):
     destination_chains: Mapping[str, Chain]
@@ -136,19 +139,16 @@ class InputAdapterChain(Chain):
 
 
 class PromptFactory():
-    location_template = """<s>[INST] <<SYS>>You are a very smart location entity extracter with good knowledge of all the locations in the world. \
-    You answer questions related to location extraction.\
-    Your response only contains location names such as country, province, city, town, zip code, roads, rivers, seas, oceans.\
-    <<SYS>> 
+    location_template = """<s>[INST] <<SYS>>You are a very smart location entity extracter with good knowledge of all the locations in the world. 
+    If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.
+    Your response only contains location names such as country, province, city, town, zip code, roads, rivers, seas, oceans.<<SYS>>  
     Answer question according to the following context only!
     Context: {context}
     Question:{question}[/INST]"""
 
 
-    human_template = """<s>[INST] <<SYS>>You are a data analyst that detects the number of human casualties mentioned within the context provided.\
-    You provide a sum of deaths. \
-    You also provide a sum of injuries. \
-    You provide answers for deaths and injuries seperatley as a number. If no deaths are mentioned return 0 deaths. If no injuries are mentioned return 0 injuries\
+    numbers_template = """<s>[INST] <<SYS>>Your are an expert at detecting and extracting numbers and important figures within sentences. Your provide a summary of the gathered information as truthfully as possible.
+    If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.
     <<SYS>> 
     Answer question according to the following context only!
     Context: {context}
@@ -158,8 +158,8 @@ class PromptFactory():
     prompt_infos = [
         {
             'name': 'casualties_detector',
-            'description': 'Good for summing up the number of casualties such as deaths and injuries',
-            'prompt_template': human_template
+            'description': 'Good for summarizing number based questions such as number of deaths, injuries, property damages etc',
+            'prompt_template': numbers_template
         },
         {
             'name': 'location_extractor',
@@ -266,9 +266,8 @@ class LangChain_analysis:
     def hydeEmbedder(self,embeddingsModel):
         model = chatModel
 
-        prompt_template  = """<s>[INST] <<SYS>>You are a truthfull AI assistant. Who follows the instructions closely and answers precisely about what is asked
-        <<SYS>> 
-        You are a twitter bot expert at generating tweets. Develop a few tweets related to the question given below: 
+        prompt_template  = """<s>[INST] <<SYS>>You are a truthful AI assistant<<SYS>> 
+        You are a twitter bot expert at generating tweets. Develop a few dummy tweets related to the question given below: 
         Question: {question}[/INST]"""
         prompt = PromptTemplate(input_variables=["question"], template= prompt_template)
         llm_chain_hyde  = LLMChain(llm = model, prompt=prompt)
@@ -335,10 +334,9 @@ class LangChain_analysis:
             destination_chains[name] = adapted_chain
 
         #Default chain and prompt
-        default_prompt_template = """<s>[INST] <<SYS>>You are a truthfull AI assistant. Who follows the instructions closely and answers precisely about what is asked
-        <<SYS>> 
+        default_prompt_template = """<s>[INST] <<SYS>>{system_prompt}<<SYS>> 
         Answer the question based only on the following tweet's context: {context}
-        Question: {question}"""
+        Question: {question}[/INST]"""
         default_prompt = PromptTemplate(template = default_prompt_template, input_variables = ['question', 'context'])
         default_chain = RetrievalQA.from_chain_type(llm = model,
                                 chain_type='stuff',
@@ -379,8 +377,8 @@ if __name__ == "__main__":
     #                                 _dateTo = "2023-10-19 23:58:47+00:00")
 
     langChain_analysis = LangChain_analysis(_dataPath = dataPath,
-                                _dateFrom = "2023-10-2 21:06:21+00:00",
-                                _dateTo = "2023-10-3 23:58:47+00:00")
+                                _dateFrom = "2023-10-19 21:06:21+00:00",
+                                _dateTo = "2023-10-19 23:58:47+00:00")
 
     # question = "Which places/location's recieved a flood warning or evacuation orders? Which places are affected by floods"
     # output = langChain_analysis.predictions_response(question)
