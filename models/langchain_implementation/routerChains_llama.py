@@ -79,8 +79,7 @@ def loadLlamma():
             return_full_text = True,
             tokenizer = local_tokenizer,
             temperature = 0.1,
-            max_new_tokens = 800,
-            repitition_penalty = 1.1
+            max_new_tokens = 560
         )
 
     chatModel= HuggingFacePipeline(pipeline=pipeline)
@@ -276,8 +275,8 @@ class LangChain_analysis:
     def hydeEmbedder(self,embeddingsModel):
         model = chatModel
 
-        prompt_template  = """<s>[INST] <<SYS>>You are a truthful AI assistant<<SYS>> 
-        You are a twitter bot expert at generating tweets. Develop a few dummy tweets related to the question given below: 
+        prompt_template  = """<s>[INST] <<SYS>>Act as a twitter bot who is an expert at generating tweets<<SYS>> 
+        Develop a few dummy tweets as possible answers to the question given below 
         Question: {question}[/INST]"""
         prompt = PromptTemplate(input_variables=["question"], template= prompt_template)
         llm_chain_hyde  = LLMChain(llm = model, prompt=prompt)
