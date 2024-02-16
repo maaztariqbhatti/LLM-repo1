@@ -326,8 +326,8 @@ if __name__ == "__main__":
                                 _dateFrom = "2023-10-2 21:06:21+00:00",
                                 _dateTo = "2023-10-3 23:58:47+00:00")
 
-    prompt = "How many deaths occurred due to flooding?"
-    response = langChain_analysis.predictions_response(prompt, "bge-large-en-v1.5", "Cross-Encoder ranking")['result']
+    prompt = "Is there a mention of any casualties?"
+    response = langChain_analysis.predictions_response(prompt, "OpenAI", "Query")['result']
     print(response)
 
     #Streamlit

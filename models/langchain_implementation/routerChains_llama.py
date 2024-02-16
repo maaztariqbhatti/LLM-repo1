@@ -42,12 +42,11 @@ from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
 
 dataPath = "FSD1777_Oct23.json"
 
-dotenv.load_dotenv()
-# chatModel = ChatOpenAI()
+
 
 #Llama 2
 @st.cache_resource
-def loadLLM():
+def loadLlamma():
     #Enter your local directory wehre the model is stored
     save_path = "/home/mbhatti/mnt/d/Llama-2-13b-chat-hf"
 
@@ -58,7 +57,7 @@ def loadLLM():
 
 
     #Call the model and tokenizer from local storage
-    local_model = AutoModelForCausalLM.from_pretrained(save_path, return_dict=True, trust_remote_code=True, device_map="auto",torch_dtype=torch.bfloat16).to("cuda")
+    local_model = AutoModelForCausalLM.from_pretrained(save_path, return_dict=True, trust_remote_code=True, device_map="auto",torch_dtype=torch.bfloat16, temperature=0.5).to("cuda")
     local_tokenizer = AutoTokenizer.from_pretrained(save_path)
 
 
@@ -70,15 +69,27 @@ def loadLLM():
             do_sample = True,
             top_k = 3,
             num_return_sequences = 1,
-            max_length = 8000,
+            max_length = 4000,
             eos_token_id = local_tokenizer.eos_token_id
         )
 
     chatModel= HuggingFacePipeline(pipeline=pipeline, model_kwargs={'temperature':0.2})
 
     return chatModel
-torch.cuda.empty_cache()
-chatModel = loadLLM()
+
+#Open AI 
+@st.cache_resource
+def loadOpenAI():
+    dotenv.load_dotenv()
+    chatModelOpenAI = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0.5)
+
+    return chatModelOpenAI
+
+# torch.cuda.empty_cache()
+chatModel = loadLlamma()
+
+chatModelOpenAI = loadOpenAI()
+
 class DKMultiPromptChain (MultiRouteChain):
     destination_chains: Mapping[str, Chain]
     """Map of name to candidate chains that inputs can be routed to. Not restricted to LLM"""
@@ -348,7 +359,7 @@ class LangChain_analysis:
             output_parser=RouterOutputParser()
         )
 
-        router_chain = LLMRouterChain.from_llm(model, router_prompt)
+        router_chain = LLMRouterChain.from_llm(chatModelOpenAI, router_prompt)
 
         chain = MultiPromptChain(
             router_chain = router_chain,
