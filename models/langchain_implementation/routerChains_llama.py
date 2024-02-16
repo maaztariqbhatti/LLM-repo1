@@ -57,23 +57,33 @@ def loadLlamma():
 
 
     #Call the model and tokenizer from local storage
-    local_model = AutoModelForCausalLM.from_pretrained(save_path, return_dict=True, trust_remote_code=True, device_map="auto",torch_dtype=torch.bfloat16, temperature=0.5).to("cuda")
+    local_model = AutoModelForCausalLM.from_pretrained(save_path, return_dict=True, trust_remote_code=True, device_map="auto",torch_dtype=torch.bfloat16).to("cuda")
     local_tokenizer = AutoTokenizer.from_pretrained(save_path)
 
 
+    # pipeline = transformers.pipeline(
+    #         task = "text-generation",
+    #         model = local_model,
+    #         return_full_text = True,
+    #         tokenizer = local_tokenizer,
+    #         temperature = 0.01,
+    #         do_sample = True,
+    #         top_k = 5,
+    #         num_return_sequences = 1,
+    #         max_length = 4000,
+    #         eos_token_id = local_tokenizer.eos_token_id
+    #     )
     pipeline = transformers.pipeline(
-            "text-generation",
+            task = "text-generation",
             model = local_model,
+            return_full_text = True,
             tokenizer = local_tokenizer,
-            torch_dtype = torch.bfloat16,
-            do_sample = True,
-            top_k = 3,
-            num_return_sequences = 1,
-            max_length = 4000,
-            eos_token_id = local_tokenizer.eos_token_id
+            temperature = 0.1,
+            max_new_tokens = 800,
+            repitition_penalty = 1.1
         )
 
-    chatModel= HuggingFacePipeline(pipeline=pipeline, model_kwargs={'temperature':0.2})
+    chatModel= HuggingFacePipeline(pipeline=pipeline)
 
     return chatModel
 
