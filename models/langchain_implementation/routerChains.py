@@ -35,6 +35,7 @@ from langchain_community.document_transformers import (
 )
 from sentence_transformers import CrossEncoder
 import streamlit as st
+import datetime
 
 dataPath = "FSD1777_Oct23.json"
 dotenv.load_dotenv()
@@ -244,7 +245,7 @@ class LangChain_analysis:
         return db
     
     """Langchain and LLM processing code"""
-    def predictions_response(self, input_question, eModel = "bge-large-en-v1.5", rType = "Query", k = 20):
+    def predictions_response(self, input_question, eModel = "bge-large-en-v1.5", rType = "Query", rerank = False,k = 20):
         # Load the data from source
         data = self.json_dataloader()
 
@@ -252,7 +253,7 @@ class LangChain_analysis:
         vectorstore = self.data_embedding(data, eModel= eModel, rType= rType)
         
         #Get retriever
-        if rType == "Cross-Encoder ranking":
+        if rerank == True:
             retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k}))
         else:
             retriever = vectorstore.as_retriever(search_kwargs={'k': k})
@@ -326,77 +327,89 @@ if __name__ == "__main__":
                                 _dateFrom = "2023-10-2 21:06:21+00:00",
                                 _dateTo = "2023-10-3 23:58:47+00:00")
 
-    prompt = "Is there a mention of any casualties?"
-    response = langChain_analysis.predictions_response(prompt, "OpenAI", "Query")['result']
-    print(response)
+    # prompt = "Is there a mention of any casualties?"
+    # response = langChain_analysis.predictions_response(prompt, "OpenAI", "Query")['result']
+    # print(response)
 
     #Streamlit
-    # st.title("SNS early flood warning 🤖")
+    st.title("SNS early flood warning 🤖")
 
-    # #Side bar to select parameters
-    # with st.sidebar:
-    #     st.write("Embedding option")
+    #Side bar to select parameters
+    with st.sidebar:
 
-    #     #Select embedding model
-    #     k = st.number_input("Select number of documents to add inside LLM prompt", min_value= 2, max_value= 35,step=1)
+        #From and to date time 
+        # start_date = st.date_input('Enter start date', value=datetime.datetime(2019,7,6))
+        # start_time = st.time_input('Enter start time', datetime.time(8, 45))
 
-    #     eModel = st.selectbox(
-    #     "Embedding model",
-    #     ("OpenAI", "bge-large-en-v1.5"),
-    #     index=None, 
-    #     placeholder="Select embedding model...",
-    #     )
-    #     st.write('You selected:', eModel)
-    #     #select retrieval type
-    #     rType= st.selectbox(
-    #     "Retrieval type",
-    #     ("Query", "Hyde", "Cross-Encoder ranking"),
-    #     index=None, 
-    #     placeholder="Select retrieval type...",
-    #     )
-    #     st.write('You selected:', rType)
+        # start_datetime = datetime.datetime.combine(start_date, start_time)
+        # st.write(start_datetime)
 
-    # #Predefined prompts
-    # col1, col2, col3, col4 = st.columns([1,1,1,1])
-    # with col1:
-    #     floodLoc = st.button("Find flooded locations")
-    # with col2:
-    #     roadsClosure = st.button("Roads/transport closure")
+        st.write("Embedding option")
+        #Select embedding model
+        k = st.number_input("Select number of documents to add inside LLM prompt context", min_value= 2, max_value= 40,step=1)
 
-    # st_input = st.chat_input("Talk to me")
+        eModel = st.selectbox(
+        "Embedding model",
+        ("OpenAI", "bge-large-en-v1.5"),
+        index=None, 
+        placeholder="Select embedding model...",
+        )
+        st.write('You selected:', eModel)
+        #select retrieval type
+        rType= st.selectbox(
+        "Retrieval type",
+        ("Query", "Hyde"),
+        index=None, 
+        placeholder="Select retrieval type...",
+        )
+        st.write('You selected:', rType)
 
-    # # Initialize chat history
-    # if "messages" not in st.session_state:
-    #     st.session_state.messages = []
+        #select weather to use cross encoder or not
+        rerank= st.checkbox("Use cross-encoder re-rank?")
+        if rerank:
+            st.write("The retrieved documents will be re ranked!")
 
-    # # Display chat messages from history on app rerun
-    # for message in st.session_state.messages:
-    #     with st.chat_message(message["role"]):
-    #         st.markdown(message["content"])
+    #Predefined prompts
+    col1, col2, col3, col4 = st.columns([1,1,1,1])
+    with col1:
+        floodLoc = st.button("Find flooded locations")
+    with col2:
+        roadsClosure = st.button("Roads/transport closure")
+
+    st_input = st.chat_input("Talk to me")
+
+    # Initialize chat history
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
+    # Display chat messages from history on app rerun
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
         
-    # if floodLoc == True:
-    #     hard_prompt = "Which places/location's received a flood warning or evacuation orders?"
-    #     st_input = hard_prompt
-    # if roadsClosure == True:
-    #     st_input = "Is there a mention of closure of roads? Closure of transport services? If so where"
+    if floodLoc == True:
+        hard_prompt = "Which places/location's received a flood warning or evacuation orders?"
+        st_input = hard_prompt
+    if roadsClosure == True:
+        st_input = "Is there a mention of closure of roads? Closure of transport services? If so where"
 
-    # # React to user input
-    # if prompt := st_input:
-    #     # Display user message in chat message container
-    #     with st.chat_message("user"):
-    #         st.markdown(prompt)
-    #         # Add user message to chat history
-    #     st.session_state.messages.append({"role": "user", "content": prompt})
+    # React to user input
+    if prompt := st_input:
+        # Display user message in chat message container
+        with st.chat_message("user"):
+            st.markdown(prompt)
+            # Add user message to chat history
+        st.session_state.messages.append({"role": "user", "content": prompt})
 
-    #     # Display assistant response in chat message container
-    #     with st.chat_message("assistant"):
-    #         with st.spinner():
-    #             #Chatbot response
-    #             response = langChain_analysis.predictions_response(prompt, eModel, rType, k)['result']
-    #             st.markdown(response)
+        # Display assistant response in chat message container
+        with st.chat_message("assistant"):
+            with st.spinner():
+                #Chatbot response
+                response = langChain_analysis.predictions_response(prompt, eModel, rType, rerank, k)['result']
+                st.markdown(response)
 
-    #     # Add assistant response to chat history
-    #     st.session_state.messages.append({"role": "assistant", "content": response})
+        # Add assistant response to chat history
+        st.session_state.messages.append({"role": "assistant", "content": response})
 
 
 

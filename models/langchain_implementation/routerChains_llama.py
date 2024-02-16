@@ -307,7 +307,7 @@ class LangChain_analysis:
         return db
     
     """Langchain and LLM processing code"""
-    def predictions_response(self, input_question, eModel = "bge-large-en-v1.5", rType = "Query", k = 20):
+    def predictions_response(self, input_question, eModel = "bge-large-en-v1.5", rType = "Query", rerank = False,k = 20):
         # Load the data from source
         data = self.json_dataloader()
 
@@ -315,7 +315,7 @@ class LangChain_analysis:
         vectorstore = self.data_embedding(data, eModel= eModel, rType= rType)
         
         #Get retriever
-        if rType == "Cross-Encoder ranking":
+        if rerank == True:
             retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k}))
         else:
             retriever = vectorstore.as_retriever(search_kwargs={'k': k})
@@ -396,15 +396,22 @@ if __name__ == "__main__":
     # response = langChain_analysis.predictions_response(prompt, "bge-large-en-v1.5", "Cross-Encoder ranking")['result']
     # print(response)
 
-    #Streamlit
+ #Streamlit
     st.title("SNS early flood warning 🤖")
 
     #Side bar to select parameters
     with st.sidebar:
-        st.write("Embedding option")
 
+        #From and to date time 
+        # start_date = st.date_input('Enter start date', value=datetime.datetime(2019,7,6))
+        # start_time = st.time_input('Enter start time', datetime.time(8, 45))
+
+        # start_datetime = datetime.datetime.combine(start_date, start_time)
+        # st.write(start_datetime)
+
+        st.write("Embedding option")
         #Select embedding model
-        k = st.number_input("Select number of documents to add inside LLM prompt", min_value= 2, max_value= 35,step=1)
+        k = st.number_input("Select number of documents to add inside LLM prompt context", min_value= 2, max_value= 40,step=1)
 
         eModel = st.selectbox(
         "Embedding model",
@@ -416,11 +423,16 @@ if __name__ == "__main__":
         #select retrieval type
         rType= st.selectbox(
         "Retrieval type",
-        ("Query", "Hyde", "Cross-Encoder ranking"),
+        ("Query", "Hyde"),
         index=None, 
         placeholder="Select retrieval type...",
         )
         st.write('You selected:', rType)
+
+        #select weather to use cross encoder or not
+        rerank= st.checkbox("Use cross-encoder re-rank?")
+        if rerank:
+            st.write("The retrieved documents will be re ranked!")
 
     #Predefined prompts
     col1, col2, col3, col4 = st.columns([1,1,1,1])
@@ -458,7 +470,7 @@ if __name__ == "__main__":
         with st.chat_message("assistant"):
             with st.spinner():
                 #Chatbot response
-                response = langChain_analysis.predictions_response(prompt, eModel, rType, k)['result']
+                response = langChain_analysis.predictions_response(prompt, eModel, rType, rerank, k)['result']
                 st.markdown(response)
 
         # Add assistant response to chat history
