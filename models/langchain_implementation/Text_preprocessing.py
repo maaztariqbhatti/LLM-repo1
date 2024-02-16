@@ -21,7 +21,7 @@ class Text_preprocessing:
             text =  re.sub(r"http\S+", "", text)
 
             """Remove user mentions"""
-            text =  re.sub(r'@\w+', "", text)
+            # text =  re.sub(r'@\w+', "", text)
 
             """Remove emoji"""
             text = self.emoji_remove(text)
