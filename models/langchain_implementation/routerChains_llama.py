@@ -155,8 +155,7 @@ class PromptFactory():
     Question:{question}[/INST]"""
 
 
-    numbers_template = """<s>[INST] <<SYS>>Your are an expert at detecting and extracting numbers and important figures within sentences. Your provide a summary of the gathered information as truthfully as possible.
-    If you don't know the answer to a question, please don't share false information.
+    numbers_template = """<s>[INST] <<SYS>>Your are an expert at detecting and extracting number of casualties such as deaths and injuries within sentences. Your provide a summary of the context provided!
     <<SYS>> 
     Answer question according to the following context only!
     Context: {context}
@@ -435,7 +434,7 @@ if __name__ == "__main__":
     with col1:
         floodLoc = st.button("Find flooded locations")
     with col2:
-        roadsClosure = st.button("Roads/transport closure")
+        roadsClosure = st.button("Find roads closure")
 
     st_input = st.chat_input("Talk to me")
 
@@ -449,10 +448,10 @@ if __name__ == "__main__":
             st.markdown(message["content"])
         
     if floodLoc == True:
-        hard_prompt = "Which places/location's received a flood warning or evacuation orders?"
+        hard_prompt = "Which places/location's received a flood weather warning or evacuation orders?"
         st_input = hard_prompt
     if roadsClosure == True:
-        st_input = "Is there a mention of closure of roads? Closure of transport services? If so where"
+        st_input = "Is there a mention of closure of roads? If so which roads/highways are shut down due to flooding?"
 
     # React to user input
     if prompt := st_input:
