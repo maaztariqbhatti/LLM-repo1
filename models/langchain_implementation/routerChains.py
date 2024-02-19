@@ -323,9 +323,9 @@ if __name__ == "__main__":
     #                                 _dateFrom = "2023-10-19 21:06:21+00:00",
     #                                 _dateTo = "2023-10-19 23:58:47+00:00")
 
-    langChain_analysis = LangChain_analysis(_dataPath = dataPath,
-                                _dateFrom = "2023-10-2 21:06:21+00:00",
-                                _dateTo = "2023-10-3 23:58:47+00:00")
+    # langChain_analysis = LangChain_analysis(_dataPath = dataPath,
+    #                             _dateFrom = "2023-10-2 21:06:21+00:00",
+    #                             _dateTo = "2023-10-3 23:58:47+00:00")
 
     # prompt = "Is there a mention of any casualties?"
     # response = langChain_analysis.predictions_response(prompt, "OpenAI", "Query")['result']
@@ -338,11 +338,10 @@ if __name__ == "__main__":
     with st.sidebar:
 
         #From and to date time 
-        # start_date = st.date_input('Enter start date', value=datetime.datetime(2019,7,6))
-        # start_time = st.time_input('Enter start time', datetime.time(8, 45))
-
-        # start_datetime = datetime.datetime.combine(start_date, start_time)
-        # st.write(start_datetime)
+        st.write("Select duration of event")
+        start_date = st.text_input(label='Start date')
+        end_date = st.text_input(label='End date')
+        
 
         st.write("Embedding option")
         #Select embedding model
@@ -405,6 +404,10 @@ if __name__ == "__main__":
         with st.chat_message("assistant"):
             with st.spinner():
                 #Chatbot response
+                langChain_analysis = LangChain_analysis(_dataPath = dataPath,
+                            _dateFrom = start_date,
+                            _dateTo = end_date)
+
                 response = langChain_analysis.predictions_response(prompt, eModel, rType, rerank, k)['result']
                 st.markdown(response)
 

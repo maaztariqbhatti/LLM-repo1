@@ -148,16 +148,15 @@ class InputAdapterChain(Chain):
 
 
 class PromptFactory():
-    location_template = """<s>[INST] <<SYS>>You are a very smart location entity extracter with good knowledge of all the locations in the world. 
-    If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.
-    Your response only contains location names such as country, province, city, town, zip code, roads, rivers, seas, oceans.<<SYS>>  
+    location_template = """<s>[INST] <<SYS>>You are a very smart location entity extracter with good knowledge of all the locations in the world. If you don't know the answer to a question, please don't share false information.
+    Your response only contains location names such as country, province, city, town, zip code, roads, rivers, seas.<<SYS>>  
     Answer question according to the following context only!
     Context: {context}
     Question:{question}[/INST]"""
 
 
     numbers_template = """<s>[INST] <<SYS>>Your are an expert at detecting and extracting numbers and important figures within sentences. Your provide a summary of the gathered information as truthfully as possible.
-    If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.
+    If you don't know the answer to a question, please don't share false information.
     <<SYS>> 
     Answer question according to the following context only!
     Context: {context}
@@ -276,7 +275,7 @@ class LangChain_analysis:
         model = chatModel
 
         prompt_template  = """<s>[INST] <<SYS>>Act as a twitter bot who is an expert at generating tweets<<SYS>> 
-        Develop a few dummy tweets as possible answers to the question given below 
+        Follow the instruction and answer the question in the form of tweets.
         Question: {question}[/INST]"""
         prompt = PromptTemplate(input_variables=["question"], template= prompt_template)
         llm_chain_hyde  = LLMChain(llm = model, prompt=prompt)
@@ -343,9 +342,8 @@ class LangChain_analysis:
             destination_chains[name] = adapted_chain
 
         #Default chain and prompt
-        default_prompt_template = """<s>[INST] <<SYS>>You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
-        If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.<<SYS>> 
-        Answer the question based only on the following tweet's context: {context}
+        default_prompt_template = """<s>[INST] <<SYS>>You are a helpful, respectful and honest assistant. If you don't know the answer to a question, please don't share false information.<<SYS>> 
+        Answer the question based only on the following tweet's context only: {context}
         Question: {question}[/INST]"""
         default_prompt = PromptTemplate(template = default_prompt_template, input_variables = ['question', 'context'])
         default_chain = RetrievalQA.from_chain_type(llm = model,
@@ -386,9 +384,9 @@ if __name__ == "__main__":
     #                                 _dateFrom = "2023-10-19 21:06:21+00:00",
     #                                 _dateTo = "2023-10-19 23:58:47+00:00")
 
-    langChain_analysis = LangChain_analysis(_dataPath = dataPath,
-                                _dateFrom = "2023-10-19 21:06:21+00:00",
-                                _dateTo = "2023-10-19 23:58:47+00:00")
+    # langChain_analysis = LangChain_analysis(_dataPath = dataPath,
+    #                             _dateFrom = "2023-10-19 21:06:21+00:00",
+    #                             _dateTo = "2023-10-19 23:58:47+00:00")
 
     # question = "Which places/location's recieved a flood warning or evacuation orders? Which places are affected by floods"
     # output = langChain_analysis.predictions_response(question)
@@ -403,11 +401,9 @@ if __name__ == "__main__":
     with st.sidebar:
 
         #From and to date time 
-        # start_date = st.date_input('Enter start date', value=datetime.datetime(2019,7,6))
-        # start_time = st.time_input('Enter start time', datetime.time(8, 45))
-
-        # start_datetime = datetime.datetime.combine(start_date, start_time)
-        # st.write(start_datetime)
+        st.write("Select duration of event")
+        start_date = st.text_input(label='Start date')
+        end_date = st.text_input(label='End date')
 
         st.write("Embedding option")
         #Select embedding model
@@ -469,6 +465,9 @@ if __name__ == "__main__":
         # Display assistant response in chat message container
         with st.chat_message("assistant"):
             with st.spinner():
+                langChain_analysis = LangChain_analysis(_dataPath = dataPath,
+                            _dateFrom = start_date,
+                            _dateTo = end_date)
                 #Chatbot response
                 response = langChain_analysis.predictions_response(prompt, eModel, rType, rerank, k)['result']
                 st.markdown(response)
