@@ -385,7 +385,7 @@ class LangChain_analysis:
             output_parser=RouterOutputParser()
         )
 
-        router_chain = LLMRouterChain.from_llm(chatModelOpenAI, router_prompt)
+        router_chain = LLMRouterChain.from_llm(chatMistral, router_prompt)
 
         chain = MultiPromptChain(
             router_chain = router_chain,
