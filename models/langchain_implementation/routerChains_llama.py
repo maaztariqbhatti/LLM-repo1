@@ -102,6 +102,8 @@ def loadMistral7b():
             max_new_tokens = 560
         )
     chatModel= HuggingFacePipeline(pipeline=pipeline_m7b)
+    
+    return chatModel
 
 #Open AI 
 @st.cache_resource
