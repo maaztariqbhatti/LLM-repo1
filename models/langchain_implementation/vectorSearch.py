@@ -65,11 +65,11 @@ class CustomRetriever(VectorStoreRetriever):
             i = i+1
         #Sort documents according to score
         sorted_docs = sorted(docs, key=lambda doc: doc.metadata.get('cross-encoder_score'), reverse=True)
-
+        print(sorted_docs)
         #Re order according to long text re-order (Important context in start and end)
         reordering = LongContextReorder()
         reordered_docs = reordering.transform_documents(sorted_docs)
-
+        print(reordered_docs)
         #Remove cross encoder score so re ordered context is back to its orignal form
         for doc in reordered_docs:
             doc.metadata.pop("cross-encoder_score")
