@@ -292,10 +292,10 @@ class LangChain_analysis:
         return model
     
     def hydeEmbedder(self,embeddingsModel):
-        model = chatModel
+        model = chatMistral
 
-        prompt_template  = """<s>[INST] <<SYS>>Act as a twitter bot who is an expert at generating tweets<<SYS>> 
-        Follow the instruction and answer the question in the form of tweets.
+        prompt_template  = """[INST]Act as a twitter bot who is an expert at generating tweets.
+        Follow the instruction and generate possible tweets related to the question.
         Question: {question}[/INST]"""
         prompt = PromptTemplate(input_variables=["question"], template= prompt_template)
         llm_chain_hyde  = LLMChain(llm = model, prompt=prompt)
@@ -385,7 +385,7 @@ class LangChain_analysis:
             output_parser=RouterOutputParser()
         )
 
-        router_chain = LLMRouterChain.from_llm(chatMistral, router_prompt)
+        router_chain = LLMRouterChain.from_llm(chatModelOpenAI, router_prompt)
 
         chain = MultiPromptChain(
             router_chain = router_chain,
