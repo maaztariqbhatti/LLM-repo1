@@ -28,7 +28,7 @@ pipeline_m7b = transformers.pipeline(
         model = model_m7b,
         return_full_text = True,
         tokenizer = tokenizer_m7b,
-        temperature = 0.5,
+        temperature = 0.2,
         max_new_tokens = 560
     )
 

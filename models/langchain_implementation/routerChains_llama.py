@@ -86,6 +86,23 @@ def loadLlamma():
 
     return chatModel
 
+@st.cache_resource
+def loadMistral7b():
+    device = "cuda" # the device to load the model onto
+
+    model_m7b = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", device_map="auto",torch_dtype=torch.bfloat16,trust_remote_code = True).to("cuda")
+    tokenizer_m7b = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")
+
+    pipeline_m7b = transformers.pipeline(
+            task = "text-generation",
+            model = model_m7b,
+            return_full_text = True,
+            tokenizer = tokenizer_m7b,
+            temperature = 0.2,
+            max_new_tokens = 560
+        )
+    chatModel= HuggingFacePipeline(pipeline=pipeline)
+
 #Open AI 
 @st.cache_resource
 def loadOpenAI():
@@ -98,6 +115,7 @@ def loadOpenAI():
 # torch.cuda.empty_cache()
 chatModel = loadLlamma()
 chatModelOpenAI = loadOpenAI()
+chatMistral = loadMistral7b()
 
 system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
 If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."""
@@ -319,7 +337,7 @@ class LangChain_analysis:
             retriever = vectorstore.as_retriever(search_kwargs={'k': k})
 
         #  LLM initialisation
-        model = chatModel
+        model = chatMistral
         parserStr = StrOutputParser()
         #Define all the destination chains 
         prompt_factory = PromptFactory()
