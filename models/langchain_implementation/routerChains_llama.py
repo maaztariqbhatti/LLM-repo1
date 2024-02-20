@@ -98,11 +98,12 @@ def loadMistral7b():
             model = model_m7b,
             return_full_text = True,
             tokenizer = tokenizer_m7b,
+            do_sample = True,
             temperature = 0.2,
             max_new_tokens = 560
         )
     chatModel= HuggingFacePipeline(pipeline=pipeline_m7b)
-    
+
     return chatModel
 
 #Open AI 
