@@ -326,7 +326,7 @@ class LangChain_analysis:
         return db
     
     """Langchain and LLM processing code"""
-    def predictions_response(self, input_question, eModel = "bge-large-en-v1.5", rType = "Query", rerank = False,k = 20):
+    def predictions_response(self, input_question, eModel = "bge-large-en-v1.5", rType = "Query", rerank = False,k = 20, llm_model = 'Llama13bChat'):
         # Load the data from source
         data = self.json_dataloader()
 
@@ -340,7 +340,11 @@ class LangChain_analysis:
             retriever = vectorstore.as_retriever(search_kwargs={'k': k})
 
         #  LLM initialisation
-        model = chatMistral
+        if llm_model == 'Llama13bChat':
+            model = chatModel
+        else:
+            model = chatMistral
+            
         parserStr = StrOutputParser()
         #Define all the destination chains 
         prompt_factory = PromptFactory()
@@ -425,6 +429,15 @@ if __name__ == "__main__":
         start_date = st.text_input(label='Start date')
         end_date = st.text_input(label='End date')
 
+        #Select the model 
+        st.write("Select LLM")
+        llm_model = st.selectbox(
+        "LLM for inference",
+        ("Llama13bChat", "Mistral7bInstruct"),
+        index=None, 
+        placeholder="Select embedding model...",
+        )
+
         st.write("Embedding option")
         #Select embedding model
         k = st.number_input("Select number of documents to add inside LLM prompt context", min_value= 2, max_value= 40,step=1)
@@ -489,7 +502,7 @@ if __name__ == "__main__":
                             _dateFrom = start_date,
                             _dateTo = end_date)
                 #Chatbot response
-                response = langChain_analysis.predictions_response(prompt, eModel, rType, rerank, k)['result']
+                response = langChain_analysis.predictions_response(prompt, eModel, rType, rerank, k, llm_model)['result']
                 st.markdown(response)
 
         # Add assistant response to chat history
