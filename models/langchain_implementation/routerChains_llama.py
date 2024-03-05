@@ -344,7 +344,7 @@ class LangChain_analysis:
             model = chatModel
         else:
             model = chatMistral
-            
+
         parserStr = StrOutputParser()
         #Define all the destination chains 
         prompt_factory = PromptFactory()
@@ -435,7 +435,7 @@ if __name__ == "__main__":
         "LLM for inference",
         ("Llama13bChat", "Mistral7bInstruct"),
         index=None, 
-        placeholder="Select embedding model...",
+        placeholder="Select LLM...",
         )
 
         st.write("Embedding option")
