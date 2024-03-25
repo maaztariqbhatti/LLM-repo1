@@ -1,0 +1,350 @@
+from langchain_community.document_loaders.csv_loader import CSVLoader
+import os
+from langchain_community.vectorstores import FAISS
+from langchain_openai import OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
+from langchain.chains import ConversationChain, LLMChain, LLMRouterChain, MultiPromptChain, HypotheticalDocumentEmbedder, RetrievalQA
+import dotenv
+from langchain import hub
+import langchainhub
+from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+from typing import Optional
+import json
+import pandas as pd
+from Text_preprocessing import Text_preprocessing
+from langchain_community.document_loaders import DataFrameLoader
+from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
+from langchain_core.runnables import RunnableParallel, RunnablePassthrough
+from pydantic.v1 import BaseModel
+from typing import List, Dict, Any, Mapping
+from langchain.globals import set_debug
+from langchain.chains.router.base import MultiRouteChain
+from langchain.chains.router.llm_router import LLMRouterChain, RouterOutputParser
+from langchain.chains.router.multi_prompt_prompt import MULTI_PROMPT_ROUTER_TEMPLATE
+from langchain.chains.base import Chain
+from langchain.callbacks.manager import (
+    CallbackManagerForChainRun,
+)
+from langchain_community.vectorstores import chroma as Chroma
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+from langchain_core.vectorstores import VectorStoreRetriever
+from pydantic.v1 import Field
+from langchain_core.documents import Document
+from langchain_community.document_transformers import (
+    LongContextReorder
+)
+from sentence_transformers import CrossEncoder
+import datetime
+from datasets import Dataset
+from ragas import evaluate
+from ragas.metrics import (
+    faithfulness,
+    answer_relevancy,
+    context_recall,
+    context_precision,
+    context_relevancy,
+    answer_correctness,
+    answer_similarity,
+    context_entity_recall
+)
+import llmModels 
+# from ragas.llms import LangchainLLMWrapper
+import wandb
+import pickle
+import sentence_transformers
+# 1. Start a W&B Run
+
+
+# dataPath = "FSD1777_Oct23.json"
+dotenv.load_dotenv()
+chatModel_llama13b = llmModels.loadLlamma()
+chatModel_mistral7b = llmModels.loadMistral7b()
+
+dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/FSD1777_Oct23.json"
+dateFrom = "2023-10-19 21:06:21+00:00" #2023-10-19T18:58:41Z for 200 tweets
+dateTo = "2023-10-19 23:58:47+00:00"
+
+class CustomRetriever(VectorStoreRetriever):
+    """Implements re ranking of retriever output using cross encoder"""
+    vectorstore: VectorStoreRetriever
+    search_type: str = "similarity"
+    search_kwargs: dict = Field(default_factory=dict)
+
+    def get_relevant_documents(self, query: str) -> List[Document]:
+        docs = self.vectorstore.get_relevant_documents(query=query)
+
+        # Cross encoder re ranking 
+        cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+
+        pairs = []
+        for doc in docs:
+            pairs.append([query, doc.page_content])
+        scores = cross_encoder.predict(pairs)
+
+        i = 0
+        #Add scores to document
+        for doc in docs:
+            doc.metadata["cross-encoder_score"] = scores[i]
+            i = i+1
+        #Sort documents according to score
+        sorted_docs = sorted(docs, key=lambda doc: doc.metadata.get('cross-encoder_score'), reverse=True)
+
+        #Re order according to long text re-order (Important context in start and end)
+        reordering = LongContextReorder()
+        reordered_docs = reordering.transform_documents(sorted_docs)
+
+        #Remove cross encoder score so re ordered context is back to its orignal form
+        for doc in reordered_docs:
+            doc.metadata.pop("cross-encoder_score")
+        return reordered_docs
+
+"""Load relevant fields of flood tags api json response"""
+def json_dataloader(dataPath = dataPath, dateFrom = dateFrom, dateTo = dateTo):
+    # Load json and extract relevant records in pandas df
+    with open(dataPath, 'r') as json_file:
+        response_dict = json.load(json_file)
+
+    # Convert to pandas df    
+    pd.set_option('display.max_colwidth', None)
+    df = pd.DataFrame(response_dict)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.drop(columns=['id','tag_class', 'source', 'lang', 'urls','locations'])
+
+    #Get data between thresholds
+    threshold_datetime_lower = pd.to_datetime(dateFrom)
+    threshold_datetime_upper = pd.to_datetime(dateTo)
+    df = df[df['date'] >= threshold_datetime_lower]
+    df = df[df['date'] <= threshold_datetime_upper]
+
+    #Pre-process
+    preprocess = Text_preprocessing(df)
+    df = preprocess.preprocess()
+    #Covert date to string
+    df['date'] = df['date'].astype(str)
+    return df
+
+def bgeEmbeddings():
+    model_name = "BAAI/bge-large-en-v1.5"
+    model_kwargs = {'device': 'cuda'}
+    encode_kwargs = {'normalize_embeddings': True} # set True to compute cosine similarity
+    model = HuggingFaceBgeEmbeddings(
+        model_name=model_name,
+        model_kwargs=model_kwargs,
+        encode_kwargs=encode_kwargs
+    )
+    return model
+
+def hydeEmbedder(embeddingsModel):
+
+    model = chatModel_llama13b
+    prompt_template  = """<s>[INST] <<SYS>>You are a smart twitter bot. Make up 10 tweets as answers to the users question related to flooding events. Only return the dummy tweets.<<SYS>>
+    Question: {question}[/INST]"""
+    prompt = PromptTemplate(input_variables=["question"], template= prompt_template)
+    llm_chain_hyde  = LLMChain(llm = model, prompt=prompt)
+
+    embeddings = HypotheticalDocumentEmbedder(llm_chain=llm_chain_hyde,
+                                                base_embeddings=embeddingsModel,
+                                                verbose=True)
+    return embeddings
+
+
+def data_embedding(data : list, eModel = "bge-large-en-v1.5", rType = "Query"):
+    """Vectorize the data using OpenAI embeddings and store in Chroma db"""
+    if eModel != "bge-large-en-v1.5":
+        embeddings = OpenAIEmbeddings()
+    else:
+        embeddings = bgeEmbeddings()
+    
+    if (rType == "Hyde"):
+        embeddings = hydeEmbedder(embeddings)
+
+    documents = []
+    loader = DataFrameLoader(data, page_content_column="text")
+    documents.extend(loader.load())
+
+    #Create a vector store
+    db = Chroma.Chroma.from_documents(documents,embeddings)
+
+    return db
+
+"""Langchain and LLM processing code"""
+def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query", rerank = False,k = 20):
+    
+    #  LLM initialisation
+    model = chatModel_llama13b
+
+    # Load the data from source
+    data = json_dataloader()
+
+    #Loading pandas dataframe from picke file
+    # with open('/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/fsd_1555_0601_21:59:22_23:59:59.pkl', 'rb') as f:
+    #     data = pickle.load(f)
+
+    # Convert to vector store
+    vectorstore = data_embedding(data, eModel= eModel, rType= rType)
+
+        # Get retriever
+    if rerank == True:
+        retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k}))
+    else:
+        retriever = vectorstore.as_retriever(search_kwargs={'k': k})
+
+    #Llama template LOCATION    
+    default_prompt_template = """<s>[INST] <<SYS>>You are a very smart location entity extracter with good knowledge of all the locations in the world. If you don't know the answer to a question, please don't share false information.
+    Your response only contains location names such as country, province, city, town, zip code, roads, rivers, seas.<<SYS>> 
+    Answer the Question based only on the following tweet's context only: 
+    {context}
+    Question: {question}[/INST]"""
+
+    default_prompt = PromptTemplate(template = default_prompt_template, input_variables = ['question', 'context'])
+    default_chain = RetrievalQA.from_chain_type(llm = model,
+                            chain_type='stuff',
+                            retriever=retriever,
+                            chain_type_kwargs={"prompt": default_prompt}
+                            )
+    
+    # default_chain.invoke(question)
+
+    # config = {"k":[10,12,14,16,18,20,22,24], 
+    #           "LLM":"Mistral-7B-Instruct-v0.2", 
+    #           "Text embedding model": "bge-large-en-v1.5"}
+
+def train_sweeps(config = None):
+
+    with wandb.init(config=config):
+
+        config = wandb.config
+         
+        # Load the data from source
+        data = json_dataloader()
+
+        # Convert to vector store
+        if (config.Retrieval_type == "HYDE"):
+            vectorstore = data_embedding(data, rType="Hyde")
+        else:
+            vectorstore = data_embedding(data)
+
+        # Get retriever
+        if config.Cross_Encoder_rerank == "Yes":
+            retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': config.k}))
+        else:
+            retriever = vectorstore.as_retriever(search_kwargs={'k': config.k})
+
+        #  LLM initialisation
+        if (config.LLM == "Llama-2-13b-chat-hf"):
+            model = chatModel_llama13b
+        else:
+            model = chatModel_mistral7b
+
+        # parserStr = StrOutputParser()
+
+        #Open AI template
+        # default_prompt_template = """Answer the question based only on the following tweet's context: {context}
+        # Question: {question}"""
+
+        #Llama template LOCATION    
+        default_prompt_template = """<s>[INST] <<SYS>>You are a very smart location entity extracter with good knowledge of all the locations in the world. If you don't know the answer to a question, please don't share false information.
+        Your response only contains location names such as country, province, city, town, zip code, roads, rivers, seas.<<SYS>> 
+        Answer the Question based only on the following tweet's context only: 
+        {context}
+        Question: {question}[/INST]"""
+
+        default_prompt = PromptTemplate(template = default_prompt_template, input_variables = ['question', 'context'])
+        default_chain = RetrievalQA.from_chain_type(llm = model,
+                                chain_type='stuff',
+                                retriever=retriever,
+                                chain_type_kwargs={"prompt": default_prompt}
+                                )
+        
+        #Evaluation using RAGAS
+        questions = ["What areas were alerted with flood or weather warnings?"]
+
+        ground_truths = [["Scotland,Essex,Scotland, Ireland,Haringey,Angus,Dundee way,UK,Perthshire,Aberdeenshire,Dundee, Stonehaven, A90,Ireland,main road connecting Dundee and Aberdeen, Scotland,Middleton,Perth,Sheffield,Brechin,River Spen,Alyth"]]
+
+        answers = []
+        contexts = []
+
+        # Inference
+        for query in questions:
+            answers.append(default_chain.invoke(query)['result'])
+            contexts.append([docs.page_content for docs in retriever.get_relevant_documents(query)])
+
+        # To dict
+        data = {
+            "question": questions,
+            "answer": answers,
+            "contexts": contexts,
+            "ground_truths": ground_truths
+        }
+
+        # Convert dict to dataset
+        dataset = Dataset.from_dict(data)
+
+        result = evaluate(
+        dataset = dataset, 
+        metrics=[
+        answer_similarity,
+        answer_correctness,
+        context_entity_recall
+        ],
+        )
+
+        wandb.log({"answer_similarity" : result['answer_similarity'], 
+                   "answer_correctness": result['answer_correctness'],
+                    "context_entity_recall": result['context_entity_recall']
+                   })
+        artifact = wandb.Artifact(name="response", type="LLM response")
+        artifact.add_file()
+
+    
+    # return result
+    
+
+
+if __name__ == "__main__":
+
+    # prompt = "Which places received a flood weather warning?"
+    # predictions_response(prompt)
+
+    # # 1. Sweep configurations
+    sweep_config = {
+        'method': 'random'
+    }
+
+    parameters_dict = {
+    'k': {
+        'values': [15,20,25]
+        },
+    'LLM': {
+        'values': ["Mistral-7B-Instruct-v0.2", "Llama-2-13b-chat-hf"]
+        },
+    'Cross_Encoder_rerank': {
+        'values' : ["No","Yes"]
+        },
+    'Retrieval_type': {
+        'values' : ["Query","HYDE"]
+    }
+    }
+
+    sweep_config['parameters'] = parameters_dict    
+
+    #Initialise sweep
+    sweep_id = wandb.sweep(sweep_config, project="FW_1555_sweep_1")
+
+    wandb.agent(sweep_id, train_sweeps, count=5)
+
+                                                    
+
+
+
+
+
+
+
+
+
+
+
+
+
+

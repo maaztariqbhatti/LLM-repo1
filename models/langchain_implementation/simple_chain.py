@@ -42,10 +42,20 @@ from ragas.metrics import (
     answer_relevancy,
     context_recall,
     context_precision,
+    context_relevancy,
+    answer_correctness
 )
-dataPath = "FSD1777_Oct23.json"
+import llmModels 
+# from ragas.llms import LangchainLLMWrapper
+import wandb
+import pickle
+import sentence_transformers
+# 1. Start a W&B Run
+
+
+# dataPath = "FSD1777_Oct23.json"
 dotenv.load_dotenv()
-chatModel = ChatOpenAI()
+chatModel = llmModels.loadLlamma()
 
 class CustomRetriever(VectorStoreRetriever):
     """Implements re ranking of retriever output using cross encoder"""
@@ -119,7 +129,7 @@ class LangChain_analysis:
     
     def bgeEmbeddings(self):
         model_name = "BAAI/bge-large-en-v1.5"
-        model_kwargs = {'device': 'cpu'}
+        model_kwargs = {'device': 'cuda'}
         encode_kwargs = {'normalize_embeddings': True} # set True to compute cosine similarity
         model = HuggingFaceBgeEmbeddings(
             model_name=model_name,
@@ -162,80 +172,131 @@ class LangChain_analysis:
         return db
     
     """Langchain and LLM processing code"""
-    def predictions_response(self, input_question, eModel = "bge-large-en-v1.5", rType = "Query", rerank = False,k = 20):
+    def predictions_response(self, question, eModel = "bge-large-en-v1.5", rType = "Query", rerank = False,k = 20):
+        
+        #  LLM initialisation
+        model = chatModel
+
         # Load the data from source
         data = self.json_dataloader()
 
+        #Loading pandas dataframe from picke file
+        # with open('/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/fsd_1555_0601_21:59:22_23:59:59.pkl', 'rb') as f:
+        #     data = pickle.load(f)
+
         # Convert to vector store
         vectorstore = self.data_embedding(data, eModel= eModel, rType= rType)
-        
-        #Get retriever
+
+         # Get retriever
         if rerank == True:
             retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k}))
         else:
             retriever = vectorstore.as_retriever(search_kwargs={'k': k})
 
-        #  LLM initialisation
-        model = chatModel
-        # parserStr = StrOutputParser()
-        default_prompt_template = """Answer the question based only on the following tweet's context: {context}
-        Question: {question}"""
+        #Llama template LOCATION    
+        default_prompt_template = """<s>[INST] <<SYS>>You are a very smart location entity extracter with good knowledge of all the locations in the world. If you don't know the answer to a question, please don't share false information.
+        Your response only contains location names such as country, province, city, town, zip code, roads, rivers, seas.<<SYS>> 
+        Answer the Question based only on the following tweet's context only: 
+        {context}
+        Question: {question}[/INST]"""
+
         default_prompt = PromptTemplate(template = default_prompt_template, input_variables = ['question', 'context'])
         default_chain = RetrievalQA.from_chain_type(llm = model,
                                 chain_type='stuff',
                                 retriever=retriever,
                                 chain_type_kwargs={"prompt": default_prompt}
                                 )
-        #Evaluation using RAGAS
-        questions = ["Which places received a flood weather warning?"]
+        
+        # default_chain.invoke(question)
 
-        ground_truths = [["Scotland,Essex,Scotland, Ireland,Haringey,Angus,Dundee way,UK,Perthshire,,Aberdeenshire,Dundee, Stonehaven, A90,Ireland,main road connecting Dundee and Aberdeen, Scotland,Middleton,northern outskirts of Perth,Sheffield,Brechin,River Spen,Alyth"]]
-        answers = []
-        contexts = []
-
-        # Inference
-        for query in questions:
-            answers.append(default_chain.invoke(query)['result'])
-            contexts.append([docs.page_content for docs in retriever.get_relevant_documents(query)])
-
-        # To dict
-        data = {
-            "question": questions,
-            "answer": answers,
-            "contexts": contexts,
-            "ground_truths": ground_truths
-        }
-
-        # Convert dict to dataset
-        dataset = Dataset.from_dict(data)
-        print(dataset)
-        result = evaluate(
-        dataset = dataset, 
-        metrics=[
-            context_precision,
-            context_recall,
-            faithfulness,
-            answer_relevancy,
-        ],
+        # # 1. Start a W&B Run
+        config = {"k":[10,12,14,16,18,20,22,24], "LLM":"Mistral-7B-Instruct-v0.2", "Text embedding model": "bge-large-en-v1.5"}
+        run = wandb.init(
+            project="LLM experiment tracking",
+            notes="Llama-2-13b-chat-hf",
+            tags=["Flood warning only", "FSD-1777"],
+            config=config
         )
+        for k in run.config["k"]:
+            # print(k)
+            # Get retriever
+            if rerank == True:
+                retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k}))
+            else:
+                retriever = vectorstore.as_retriever(search_kwargs={'k': k})
 
-        df = result.to_pandas()
-        df.to_csv('Locations evaluator')
+            # parserStr = StrOutputParser()
 
-        # return default_chain.invoke(input_question)
+            #Open AI template
+            # default_prompt_template = """Answer the question based only on the following tweet's context: {context}
+            # Question: {question}"""
+
+            #Llama template LOCATION    
+            default_prompt_template = """<s>[INST] <<SYS>>You are a very smart location entity extracter with good knowledge of all the locations in the world. If you don't know the answer to a question, please don't share false information.
+            Your response only contains location names such as country, province, city, town, zip code, roads, rivers, seas.<<SYS>> 
+            Answer the Question based only on the following tweet's context only: 
+            {context}
+            Question: {question}[/INST]"""
+
+            default_prompt = PromptTemplate(template = default_prompt_template, input_variables = ['question', 'context'])
+            default_chain = RetrievalQA.from_chain_type(llm = model,
+                                    chain_type='stuff',
+                                    retriever=retriever,
+                                    chain_type_kwargs={"prompt": default_prompt}
+                                    )
+            
+            #Evaluation using RAGAS
+            questions = ["Which places received a flood weather warning?", "How many casualties occured/ people died due to current flooding event?"]
+
+            ground_truths = [["Scotland,Essex,Scotland, Ireland,Haringey,Angus,Dundee way,UK,Perthshire,,Aberdeenshire,Dundee, Stonehaven, A90,Ireland,main road connecting Dundee and Aberdeen, Scotland,Middleton,northern outskirts of Perth,Sheffield,Brechin,River Spen,Alyth"],
+                            ["1 death"]]
+            answers = []
+            contexts = []
+
+            # Inference
+            for query in questions:
+                answers.append(default_chain.invoke(query)['result'])
+                contexts.append([docs.page_content for docs in retriever.get_relevant_documents(query)])
+
+            # To dict
+            data = {
+                "question": questions,
+                "answer": answers,
+                "contexts": contexts,
+                "ground_truths": ground_truths
+            }
+
+            # Convert dict to dataset
+            dataset = Dataset.from_dict(data)
+
+            result = evaluate(
+            dataset = dataset, 
+            metrics=[
+            context_recall,
+            answer_correctness
+            ],
+            )
+
+            wandb.log({"faithfulness": result['faithfulness'], "answer_relevancy":result['answer_relevancy'],
+            "context_recall" : result['context_recall'], "context_relevancy": result['context_relevancy']})
+
+        
+        # return result
         
 
 
 if __name__ == "__main__":
-    dataPath = "G:\My Drive\LLM-repo1\models\langchain_implementation\FSD1777_Oct23.json"
+
+    dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/FSD1777_Oct23.json"
     langChain_analysis = LangChain_analysis(_dataPath = dataPath,
                             _dateFrom = "2023-10-19 21:06:21+00:00",
                             _dateTo = "2023-10-19 23:58:47+00:00")
     prompt = "Which places received a flood weather warning?"
 
-    langChain_analysis.predictions_response(prompt, eModel="OpenAI")
-    # print(response)
+    langChain_analysis.predictions_response(prompt)
 
+    # print(response)
+                                                          
 
 
 
