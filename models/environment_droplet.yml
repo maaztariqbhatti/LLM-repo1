@@ -42,6 +42,7 @@ dependencies:
   - decorator=5.1.1=pyhd8ed1ab_0
   - dill=0.3.7=pyhd8ed1ab_0
   - docker-pycreds=0.4.0=py_0
+  - et_xmlfile=1.1.0=pyhd8ed1ab_0
   - exceptiongroup=1.2.0=pyhd8ed1ab_2
   - executing=2.0.1=pyhd8ed1ab_0
   - ffmpeg=4.3=hf484d3e_0
@@ -132,6 +133,7 @@ dependencies:
   - numpy-base=1.26.3=py311hf175353_0
   - openh264=2.1.1=h4ff587b_0
   - openjpeg=2.4.0=h3ad879b_0
+  - openpyxl=3.0.10=py311h5eee18b_0
   - openssl=3.2.1=hd590300_1
   - orc=1.7.4=hb3bc3d3_1
   - pandas=2.1.4=py311ha02d727_0
@@ -178,6 +180,7 @@ dependencies:
   - torchvision=0.16.2=py311_cu118
   - tornado=6.4=py311h459d7ec_0
   - traitlets=5.14.2=pyhd8ed1ab_0
+  - transformers=4.36.2=pyhd8ed1ab_0
   - typing-extensions=4.7.1=py311h06a4308_0
   - typing_extensions=4.9.0=pyha770c72_0
   - utf8proc=2.6.1=h27cfd23_0
@@ -295,7 +298,7 @@ dependencies:
       - psutil==5.9.7
       - psycopg2-binary==2.9.9
       - pulsar-client==3.4.0
-      - pyarrow==14.0.2
+      - pyarrow==11.0.0
       - pyasn1==0.5.1
       - pyasn1-modules==0.3.0
       - pydantic==2.0.3
@@ -318,7 +321,7 @@ dependencies:
       - safetensors==0.3.3
       - scikit-learn==1.3.2
       - scipy==1.11.4
-      - sentence-transformers==2.3.1
+      - sentence-transformers==2.2.2
       - sentencepiece==0.1.99
       - setuptools==69.0.3
       - shapely==2.0.2
@@ -335,7 +338,6 @@ dependencies:
       - toolz==0.12.1
       - torch==2.2.0
       - tqdm==4.66.1
-      - transformers==4.36.2
       - triton==2.2.0
       - typer==0.9.0
       - types-requests==2.31.0.20240106

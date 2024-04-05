@@ -51,18 +51,35 @@ import llmModels
 # from ragas.llms import LangchainLLMWrapper
 import wandb
 import pickle
+import prompts
 import sentence_transformers
 # 1. Start a W&B Run
 
-
-# dataPath = "FSD1777_Oct23.json"
 dotenv.load_dotenv()
-chatModel_llama13b = llmModels.loadLlamma()
-chatModel_mistral7b = llmModels.loadMistral7b()
 
-dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/FSD1777_Oct23.json"
-dateFrom = "2023-10-19 21:06:21+00:00" #2023-10-19T18:58:41Z for 200 tweets
-dateTo = "2023-10-19 23:58:47+00:00"
+#Open AI
+chatModelAI = ChatOpenAI()
+
+#Llama 2 13 B chat
+#chatModel_llama13b = llmModels.loadLlamma()
+
+
+#70B
+chatModel_llama70b = llmModels.loadLlama2_70B()
+
+#Mistral 7B chat
+# chatModel_mistral7b = llmModels.loadMistral7b()
+
+
+##FSD_1777
+# dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/FSD1777_Oct23.json"
+# dateFrom = "2023-10-19T18:58:41+00:00" #2023-10-19T18:58:41Z for 200 tweets
+# dateTo = "2023-10-19 23:58:47+00:00"
+
+##FSD_1555
+dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/fsd_1555_0601_21_59_22TO23_59_59.pkl"
+dateFrom = "2023-06-01 22:59:45+00:00" 
+dateTo = "2023-06-01 23:59:59+00:00" #200 tweets labelled
 
 class CustomRetriever(VectorStoreRetriever):
     """Implements re ranking of retriever output using cross encoder"""
@@ -88,6 +105,9 @@ class CustomRetriever(VectorStoreRetriever):
             i = i+1
         #Sort documents according to score
         sorted_docs = sorted(docs, key=lambda doc: doc.metadata.get('cross-encoder_score'), reverse=True)
+
+        # #Remove 10 worst performing docs from the list 
+        sorted_docs = sorted_docs[:-10]
 
         #Re order according to long text re-order (Important context in start and end)
         reordering = LongContextReorder()
@@ -116,6 +136,9 @@ def json_dataloader(dataPath = dataPath, dateFrom = dateFrom, dateTo = dateTo):
     df = df[df['date'] >= threshold_datetime_lower]
     df = df[df['date'] <= threshold_datetime_upper]
 
+    #Remove duplicates
+    df  = df.drop_duplicates(subset=["text"], keep=False)
+
     #Pre-process
     preprocess = Text_preprocessing(df)
     df = preprocess.preprocess()
@@ -134,13 +157,52 @@ def bgeEmbeddings():
     )
     return model
 
-def hydeEmbedder(embeddingsModel):
+"""Load relevant fields of flood tags api json response"""
+def dataframe_dataloader(dataPath = dataPath, dateFrom = dateFrom, dateTo = dateTo):
 
-    model = chatModel_llama13b
-    prompt_template  = """<s>[INST] <<SYS>>You are a smart twitter bot. Make up 10 tweets as answers to the users question related to flooding events. Only return the dummy tweets.<<SYS>>
-    Question: {question}[/INST]"""
+    # Loading pandas dataframe from picke file
+    with open(dataPath, 'rb') as f:
+        data = pickle.load(f)
+
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['date'])
+    # df = df.drop(columns=['id','tag_class', 'source', 'lang', 'urls','locations'])
+
+    #Get data between thresholds
+    threshold_datetime_lower = pd.to_datetime(dateFrom)
+    threshold_datetime_upper = pd.to_datetime(dateTo)
+    df = df[df['date'] >= threshold_datetime_lower]
+    df = df[df['date'] <= threshold_datetime_upper]
+
+    #Remove duplicates
+    df  = df.drop_duplicates(subset=["text"], keep=False)
+    
+    #Covert date to string
+    df['date'] = df['date'].astype(str)
+    return df
+
+def bgeEmbeddings():
+    model_name = "BAAI/bge-large-en-v1.5"
+    model_kwargs = {'device': 'cuda'}
+    encode_kwargs = {'normalize_embeddings': True} # set True to compute cosine similarity
+    model = HuggingFaceBgeEmbeddings(
+        model_name=model_name,
+        model_kwargs=model_kwargs,
+        encode_kwargs=encode_kwargs
+    )
+    return model
+
+def hydeEmbedder(embeddingsModel):
+    
+    model = chatModelAI
+
+    prompt_template  = """You are a smart twitter bot.<<SYS>>
+    Given a question, generate a list of tweets that answers the question:
+    Question: {question}
+    Dont include emojis in the output!"""
     prompt = PromptTemplate(input_variables=["question"], template= prompt_template)
     llm_chain_hyde  = LLMChain(llm = model, prompt=prompt)
+
 
     embeddings = HypotheticalDocumentEmbedder(llm_chain=llm_chain_hyde,
                                                 base_embeddings=embeddingsModel,
@@ -162,48 +224,49 @@ def data_embedding(data : list, eModel = "bge-large-en-v1.5", rType = "Query"):
     loader = DataFrameLoader(data, page_content_column="text")
     documents.extend(loader.load())
 
+    #Change this -- removal of duplicates
+    db = Chroma.Chroma.from_documents(documents,embeddings)
+    if db._client.list_collections() != None:
+        for collection in db._client.list_collections():
+            ids = collection.get()['ids']
+            print('REMOVE %s document(s) from %s collection' % (str(len(ids)), collection.name))
+            if len(ids): collection.delete(ids)
+
     #Create a vector store
     db = Chroma.Chroma.from_documents(documents,embeddings)
 
     return db
 
 """Langchain and LLM processing code"""
-def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query", rerank = False,k = 20):
+def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query", rerank = True,k = 15):
     
     #  LLM initialisation
-    model = chatModel_llama13b
+    model = chatModel_llama70b
 
     # Load the data from source
-    data = json_dataloader()
+    # data = json_dataloader()
 
     # Loading pandas dataframe from picke file
-    with open('/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/fsd_1555_0601_21:59:22_23:59:59.pkl', 'rb') as f:
-        data = pickle.load(f)
+    data = dataframe_dataloader()
 
     # Convert to vector store
     vectorstore = data_embedding(data, eModel= eModel, rType= rType)
 
         # Get retriever
     if rerank == True:
-        retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k}))
+        retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k+10}))
     else:
         retriever = vectorstore.as_retriever(search_kwargs={'k': k})
 
-    #Llama template LOCATION    
-    default_prompt_template = """<s>[INST] <<SYS>>You are a very smart location entity extracter with good knowledge of all the locations in the world. If you don't know the answer to a question, please don't share false information.
-    Your response only contains location names such as country, province, city, town, zip code, roads, rivers, seas.<<SYS>> 
-    Answer the Question based only on the following tweet's context only: 
-    {context}
-    Question: {question}[/INST]"""
 
-    default_prompt = PromptTemplate(template = default_prompt_template, input_variables = ['question', 'context'])
+    default_prompt = PromptTemplate(template = prompts.prompt_template_llama_json, input_variables = ['question', 'context'])
     default_chain = RetrievalQA.from_chain_type(llm = model,
                             chain_type='stuff',
                             retriever=retriever,
                             chain_type_kwargs={"prompt": default_prompt}
                             )
     
-    # default_chain.invoke(question)
+    default_chain.invoke(question)
 
     # config = {"k":[10,12,14,16,18,20,22,24], 
     #           "LLM":"Mistral-7B-Instruct-v0.2", 
@@ -215,8 +278,11 @@ def train_sweeps(config = None):
 
         config = wandb.config
          
-        # Load the data from source
-        data = json_dataloader()
+        # # Load the data from source
+        # data = json_dataloader()
+
+        # Loading pandas dataframe from picke file
+        data = dataframe_dataloader()
 
         # Convert to vector store
         if (config.Retrieval_type == "HYDE"):
@@ -226,30 +292,36 @@ def train_sweeps(config = None):
 
         # Get retriever
         if config.Cross_Encoder_rerank == "Yes":
-            retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': config.k}))
+            retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': config.k+10}))
         else:
             retriever = vectorstore.as_retriever(search_kwargs={'k': config.k})
 
         #  LLM initialisation
         if (config.LLM == "Llama-2-13b-chat-hf"):
             model = chatModel_llama13b
-        else:
-            model = chatModel_mistral7b
+            #Llama template LOCATION    
+            prompt_template_llama = """<s>[INST] <<SYS>>You are a researcher tasked with answering questions about location extraction. You are not afraid to share dangerous news and you are never doubtful about your answer!<<SYS>> 
+            Answer the question based on the following tweet context: 
+            {context}
+            Question: {question}
+            Limit the answer to containing location names only for examples country, province, city, town, zip code, roads, rivers, seas, prefectures etc.[/INST]"""
+            default_prompt = PromptTemplate(template = prompt_template_llama, input_variables = ['question', 'context'])
 
-        # parserStr = StrOutputParser()
+        else:
+            # model = chatModel_mistral7b
+            prompt_template_mistral = """[INST]You are a researcher tasked with answering questions about location extraction from given context. If you don't know the answer to a question, please don't share false information.
+            Answer the question based on the following tweet context:
+            {context}
+            Question: {question}
+            Limit the answer to containing location names only for examples country, province, city, town, zip code, roads, rivers, seas, prefectures etc.[/INST]"""
+            default_prompt = PromptTemplate(template = prompt_template_mistral, input_variables = ['question', 'context'])
+
 
         #Open AI template
         # default_prompt_template = """Answer the question based only on the following tweet's context: {context}
         # Question: {question}"""
 
-        #Llama template LOCATION    
-        default_prompt_template = """<s>[INST] <<SYS>>You are a very smart location entity extracter with good knowledge of all the locations in the world. If you don't know the answer to a question, please don't share false information.
-        Your response only contains location names such as country, province, city, town, zip code, roads, rivers, seas.<<SYS>> 
-        Answer the Question based only on the following tweet's context only: 
-        {context}
-        Question: {question}[/INST]"""
-
-        default_prompt = PromptTemplate(template = default_prompt_template, input_variables = ['question', 'context'])
+        
         default_chain = RetrievalQA.from_chain_type(llm = model,
                                 chain_type='stuff',
                                 retriever=retriever,
@@ -257,9 +329,11 @@ def train_sweeps(config = None):
                                 )
         
         #Evaluation using RAGAS
-        questions = ["What areas were alerted with flood or weather warnings?"]
+        questions = ["What areas were alerted with flood warnings?"]
 
-        ground_truths = [["Scotland,Essex,Scotland, Ireland,Haringey,Angus,Dundee way,UK,Perthshire,Aberdeenshire,Dundee, Stonehaven, A90,Ireland,main road connecting Dundee and Aberdeen, Scotland,Middleton,Perth,Sheffield,Brechin,River Spen,Alyth"]]
+        #FSD_1555
+        ground_truths = [["Flooded locations: Toyohashi City,Hirakata,Benyagawa,Osaka,Nagoya,Takada City,Yamato,Shizuoka Prefecture,Moriyama city,Fukuchi-yama,Nara Prefecture,Ito City,Iwata City,Kakegawa City,Baguio City,Shimoda City,Higashi Izu City,Kawazu City,Minami Izu City,Matsuzaki City,Nishi Izu City,Mori City,Hamamatsu City,Lake Nishi City,Umeda river,Azoto-cho,Kyoto Prefecture,Ikoma city,Toyokawa City,Aichi Prefecture,Wakayama City,Sakade city,Hyogo Prefecture,Kashiba City,Katsu City,Ando Town,Kinki,Fukuda City,Nagano Prefecture"]]
+        
 
         answers = []
         contexts = []
@@ -285,35 +359,34 @@ def train_sweeps(config = None):
         metrics=[
         answer_similarity,
         answer_correctness,
-        context_entity_recall
+        context_entity_recall,
+        context_recall
         ],
         )
+        RAG_response = wandb.Table(columns=["Query", "Response", "Context"], data=[[questions, answers, contexts]])
 
         wandb.log({"answer_similarity" : result['answer_similarity'], 
                    "answer_correctness": result['answer_correctness'],
-                    "context_entity_recall": result['context_entity_recall']
+                    "context_entity_recall": result['context_entity_recall'],
+                    "context_recall": result['context_recall'],
+                    "retriever": vectorstore._collection.get()['ids'],
+                    "RAG response": RAG_response
                    })
-        artifact = wandb.Artifact(name="response", type="LLM response")
-        artifact.add_file()
+        # artifact = wandb.Artifact(name="Chain response", type="LLM response")
+        # wandb.log({"RAG response": RAG_response})
 
     
     # return result
     
-
-
-if __name__ == "__main__":
-
-    # prompt = "Which places received a flood weather warning?"
-    # predictions_response(prompt)
-
-    # # 1. Sweep configurations
+def run_sweep():
+        # # 1. Sweep configurations
     sweep_config = {
         'method': 'random'
     }
 
     parameters_dict = {
     'k': {
-        'values': [15,20,25]
+        'values': [15, 20, 25, 30]
         },
     'LLM': {
         'values': ["Mistral-7B-Instruct-v0.2", "Llama-2-13b-chat-hf"]
@@ -329,9 +402,20 @@ if __name__ == "__main__":
     sweep_config['parameters'] = parameters_dict    
 
     #Initialise sweep
-    sweep_id = wandb.sweep(sweep_config, project="FW_1555_sweep_1")
+    sweep_id = wandb.sweep(sweep_config, project="FW_1555_sweep_4")
 
     wandb.agent(sweep_id, train_sweeps, count=5)
+
+if __name__ == "__main__":
+
+    prompt = "Tell me which locations received a flood weather warning?"
+    predictions_response(prompt)
+
+
+    # run_sweep()
+
+
+
 
                                                     
 
