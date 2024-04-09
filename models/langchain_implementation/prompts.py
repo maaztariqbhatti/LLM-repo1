@@ -1,3 +1,14 @@
+#Hyde
+prompt_template_HyDE_OpenAI = """Act as a twitter bot and give a hypothetical answer to the given question. Dont include emojis in the output!
+    Question: {question}
+    Tweet: 
+    """
+
+#Default chain 
+prompt_template_default = """<s>[INST] <<SYS>>You are a helpful, respectful and honest assistant. If you don't know the answer to a question, please don't share false information.<<SYS>> 
+Answer the question based only on the following tweet's context only: {context}
+Question: {question}[/INST]"""
+
 #Llama template for returning JSON but needs work
 prompt_template_llama_1 = """<s>[INST] <<SYS>>You are a researcher tasked with answering questions about location extraction from given context. If you don't know the answer to a question, please don't share false information.
 Output answer in JSON using the following format: {{"flooded_locations": extracted locations}}<</SYS>> 
@@ -10,8 +21,14 @@ context: {context}
 [/INST]"""
 
 #Llama template basic    
-prompt_template_llama = """<s>[INST] <<SYS>>You are a researcher tasked with answering questions about location extraction. If you dont know the answer then dont respond with false information.
-Output answer as list of locations<</SYS>> 
+prompt_template_llama_loc = """<s>[INST] <<SYS>>You are a researcher tasked with answering questions about location extraction. If you dont know the answer then dont respond with false information.
+Output answer as list of locations only such as country, province, city, town, roads, rivers, seas, prefectures etc.<</SYS>> 
+Answer the question based on the following context only: 
+{context}
+question: {question}
+[/INST]
+Locations:"""
+prompt_template_llama_api = """<s>[INST] <<SYS>>You are a researcher tasked with answering questions about location extraction. If you dont know the answer then dont respond with false information. Output answer as list of locations only such as country, province, city, town, roads, rivers, seas, prefectures etc.<</SYS>> 
 Answer the question based on the following context only: 
 {context}
 question: {question}
@@ -48,10 +65,29 @@ Output the answer only in json using the following json format : {{"locations" :
 ###### MISTRAL ####################
 
 #Flooded locations
-prompt_template_mistral = """[INST]You are a researcher tasked with answering questions about location extraction from given context. If you don't know the answer to a question, please don't share false information.
-Answer the question based on the following tweet context:
+prompt_template_mistral = """You are a researcher tasked with answering questions about location extraction. If you dont know the answer then dont respond with false information.
+Output answer as list of locations only such as country, province, city, town, roads, rivers, seas, prefectures etc.
+Answer the question based on the following context only: 
 {context}
-Question: {question}
-Limit the answer to containing location names for examples country, province, city, town, zip code, roads, rivers, seas, prefectures etc.
-[/INST]"""
+question: {question}
+[/INST]
+Locations: """
+
 ll = """Output the answer only in JSON in the following format {{"locations : [answer]"}}"""
+
+
+# Human casualties 
+prompt_template_human = """<s>[INST] <<SYS>>You are a analyst tasked with answering questions about human casualties such as deaths and injuries. If you dont know the answer then dont respond with false information.
+You provide a sum of casualties. Seperate deaths and injuries in your answers where applicable<</SYS>> 
+Answer the question based on the following context only: 
+{context}
+question: {question}
+[/INST]
+Casualties:"""
+
+## Geocode location
+prompt_template_geocode = """<s>[INST] <<SYS>>You are a researcher tasked with answering questions about location extraction. If you dont know the answer then dont respond with false information.
+Output the answer as geographic coordinate in the format : [latitude, longitude]<</SYS>> 
+question: {question}
+[/INST]
+[latitude, longitude]: """

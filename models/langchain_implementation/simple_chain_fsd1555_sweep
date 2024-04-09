@@ -52,6 +52,7 @@ import llmModels
 import wandb
 import pickle
 import prompts
+import groundTruths
 import sentence_transformers
 # 1. Start a W&B Run
 
@@ -60,26 +61,24 @@ dotenv.load_dotenv()
 #Open AI
 chatModelAI = ChatOpenAI()
 
-#Llama 2 13 B chat
-#chatModel_llama13b = llmModels.loadLlamma()
+# # Llama 2 13 B chat
+# chatModel_llama13b = llmModels.loadLlamma()
 
+# # Mistral 7B chat
+chatModel_mistral7b = llmModels.loadMistral7b()
 
-#70B
-chatModel_llama70b = llmModels.loadLlama2_70B()
-
-#Mistral 7B chat
-# chatModel_mistral7b = llmModels.loadMistral7b()
-
+# #70B
+# chatModel_llama70b = llmModels.loadLlama2_70B()
 
 ##FSD_1777
-# dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/FSD1777_Oct23.json"
-# dateFrom = "2023-10-19T18:58:41+00:00" #2023-10-19T18:58:41Z for 200 tweets
-# dateTo = "2023-10-19 23:58:47+00:00"
+dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/FSD1777_Oct23.json"
+dateFrom = "2023-10-19T18:58:41+00:00" #2023-10-19T18:58:41Z for 200 tweets
+dateTo = "2023-10-19 23:58:47+00:00"
 
 ##FSD_1555
-dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/fsd_1555_0601_21_59_22TO23_59_59.pkl"
-dateFrom = "2023-06-01 22:59:45+00:00" 
-dateTo = "2023-06-01 23:59:59+00:00" #200 tweets labelled
+# dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/fsd_1555_0601_21_59_22TO23_59_59.pkl"
+# dateFrom = "2023-06-01 22:59:45+00:00" 
+# dateTo = "2023-06-01 23:59:59+00:00" #200 tweets labelled
 
 class CustomRetriever(VectorStoreRetriever):
     """Implements re ranking of retriever output using cross encoder"""
@@ -159,7 +158,6 @@ def bgeEmbeddings():
 
 """Load relevant fields of flood tags api json response"""
 def dataframe_dataloader(dataPath = dataPath, dateFrom = dateFrom, dateTo = dateTo):
-
     # Loading pandas dataframe from picke file
     with open(dataPath, 'rb') as f:
         data = pickle.load(f)
@@ -181,28 +179,13 @@ def dataframe_dataloader(dataPath = dataPath, dateFrom = dateFrom, dateTo = date
     df['date'] = df['date'].astype(str)
     return df
 
-def bgeEmbeddings():
-    model_name = "BAAI/bge-large-en-v1.5"
-    model_kwargs = {'device': 'cuda'}
-    encode_kwargs = {'normalize_embeddings': True} # set True to compute cosine similarity
-    model = HuggingFaceBgeEmbeddings(
-        model_name=model_name,
-        model_kwargs=model_kwargs,
-        encode_kwargs=encode_kwargs
-    )
-    return model
 
 def hydeEmbedder(embeddingsModel):
     
     model = chatModelAI
-
-    prompt_template  = """You are a smart twitter bot.<<SYS>>
-    Given a question, generate a list of tweets that answers the question:
-    Question: {question}
-    Dont include emojis in the output!"""
+    prompt_template  = prompts.prompt_template_HyDE_OpenAI
     prompt = PromptTemplate(input_variables=["question"], template= prompt_template)
     llm_chain_hyde  = LLMChain(llm = model, prompt=prompt)
-
 
     embeddings = HypotheticalDocumentEmbedder(llm_chain=llm_chain_hyde,
                                                 base_embeddings=embeddingsModel,
@@ -234,14 +217,13 @@ def data_embedding(data : list, eModel = "bge-large-en-v1.5", rType = "Query"):
 
     #Create a vector store
     db = Chroma.Chroma.from_documents(documents,embeddings)
-
     return db
 
-"""Langchain and LLM processing code"""
-def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query", rerank = True,k = 15):
+"""For running a single query"""
+def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query", rerank = True,k = 20):
     
     #  LLM initialisation
-    model = chatModel_llama70b
+    model = chatModel_llama13b
 
     # Load the data from source
     # data = json_dataloader()
@@ -254,12 +236,12 @@ def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query"
 
         # Get retriever
     if rerank == True:
-        retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k+10}))
+        retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k+5}))
     else:
         retriever = vectorstore.as_retriever(search_kwargs={'k': k})
 
 
-    default_prompt = PromptTemplate(template = prompts.prompt_template_llama_json, input_variables = ['question', 'context'])
+    default_prompt = PromptTemplate(template = prompts.prompt_template_mistral, input_variables = ['question', 'context'])
     default_chain = RetrievalQA.from_chain_type(llm = model,
                             chain_type='stuff',
                             retriever=retriever,
@@ -268,9 +250,6 @@ def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query"
     
     default_chain.invoke(question)
 
-    # config = {"k":[10,12,14,16,18,20,22,24], 
-    #           "LLM":"Mistral-7B-Instruct-v0.2", 
-    #           "Text embedding model": "bge-large-en-v1.5"}
 
 def train_sweeps(config = None):
 
@@ -279,10 +258,10 @@ def train_sweeps(config = None):
         config = wandb.config
          
         # # Load the data from source
-        # data = json_dataloader()
+        data = json_dataloader()
 
         # Loading pandas dataframe from picke file
-        data = dataframe_dataloader()
+        # data = dataframe_dataloader()
 
         # Convert to vector store
         if (config.Retrieval_type == "HYDE"):
@@ -292,29 +271,23 @@ def train_sweeps(config = None):
 
         # Get retriever
         if config.Cross_Encoder_rerank == "Yes":
-            retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': config.k+10}))
+            retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': config.k+5}))
         else:
             retriever = vectorstore.as_retriever(search_kwargs={'k': config.k})
 
         #  LLM initialisation
-        if (config.LLM == "Llama-2-13b-chat-hf"):
-            model = chatModel_llama13b
-            #Llama template LOCATION    
-            prompt_template_llama = """<s>[INST] <<SYS>>You are a researcher tasked with answering questions about location extraction. You are not afraid to share dangerous news and you are never doubtful about your answer!<<SYS>> 
-            Answer the question based on the following tweet context: 
-            {context}
-            Question: {question}
-            Limit the answer to containing location names only for examples country, province, city, town, zip code, roads, rivers, seas, prefectures etc.[/INST]"""
-            default_prompt = PromptTemplate(template = prompt_template_llama, input_variables = ['question', 'context'])
+        # if (config.LLM == "Llama-2-13b-chat-hf"):
+        #     model = chatModel_llama13b  
+        #     default_prompt = PromptTemplate(template = prompts.prompt_template_llama_loc, input_variables = ['question', 'context'])
 
-        else:
-            # model = chatModel_mistral7b
-            prompt_template_mistral = """[INST]You are a researcher tasked with answering questions about location extraction from given context. If you don't know the answer to a question, please don't share false information.
-            Answer the question based on the following tweet context:
-            {context}
-            Question: {question}
-            Limit the answer to containing location names only for examples country, province, city, town, zip code, roads, rivers, seas, prefectures etc.[/INST]"""
-            default_prompt = PromptTemplate(template = prompt_template_mistral, input_variables = ['question', 'context'])
+        if (config.LLM == "Mistral-7B-Instruct-v0.2"):
+            model = chatModel_mistral7b
+            default_prompt = PromptTemplate(template = prompts.prompt_template_mistral, input_variables = ['question', 'context'])
+
+        # if (config.LLM == "Llama-2-70b-chat-hf"):
+        #     model = chatModel_llama70b  
+        #     default_prompt = PromptTemplate(template = prompts.prompt_template_llama_loc, input_variables = ['question', 'context'])
+
 
 
         #Open AI template
@@ -329,16 +302,17 @@ def train_sweeps(config = None):
                                 )
         
         #Evaluation using RAGAS
-        questions = ["What areas were alerted with flood warnings?"]
+        questions = ["Which locations received a flood warning?"]
 
-        #FSD_1555
-        ground_truths = [["Flooded locations: Toyohashi City,Hirakata,Benyagawa,Osaka,Nagoya,Takada City,Yamato,Shizuoka Prefecture,Moriyama city,Fukuchi-yama,Nara Prefecture,Ito City,Iwata City,Kakegawa City,Baguio City,Shimoda City,Higashi Izu City,Kawazu City,Minami Izu City,Matsuzaki City,Nishi Izu City,Mori City,Hamamatsu City,Lake Nishi City,Umeda river,Azoto-cho,Kyoto Prefecture,Ikoma city,Toyokawa City,Aichi Prefecture,Wakayama City,Sakade city,Hyogo Prefecture,Kashiba City,Katsu City,Ando Town,Kinki,Fukuda City,Nagano Prefecture"]]
+
+        #FSD_XXXX
+        ground_truths = groundTruths.ground_truths_FSD1777
         
 
         answers = []
         contexts = []
 
-        # Inference
+        # Inference 
         for query in questions:
             answers.append(default_chain.invoke(query)['result'])
             contexts.append([docs.page_content for docs in retriever.get_relevant_documents(query)])
@@ -357,62 +331,86 @@ def train_sweeps(config = None):
         result = evaluate(
         dataset = dataset, 
         metrics=[
-        answer_similarity,
         answer_correctness,
         context_entity_recall,
-        context_recall
         ],
         )
+
         RAG_response = wandb.Table(columns=["Query", "Response", "Context"], data=[[questions, answers, contexts]])
 
-        wandb.log({"answer_similarity" : result['answer_similarity'], 
-                   "answer_correctness": result['answer_correctness'],
+        wandb.log({"answer_correctness": result['answer_correctness'],
                     "context_entity_recall": result['context_entity_recall'],
-                    "context_recall": result['context_recall'],
                     "retriever": vectorstore._collection.get()['ids'],
                     "RAG response": RAG_response
                    })
-        # artifact = wandb.Artifact(name="Chain response", type="LLM response")
-        # wandb.log({"RAG response": RAG_response})
+        
 
-    
-    # return result
-    
+"""Run experiments"""
 def run_sweep():
         # # 1. Sweep configurations
     sweep_config = {
-        'method': 'random'
+        'method': 'grid'
     }
+
+    # parameters_dict = {
+    # 'k': {
+    #     'values': [15, 20 ,25]
+    #     },
+    # 'LLM': {
+    #     'values': ["Llama-2-70b-chat-hf"]
+    #     },
+    # 'Cross_Encoder_rerank': {
+    #     'values' : ["Yes", "No"]
+    #     },
+    # 'Retrieval_type': {
+    #     'values' : ["Query", "HYDE"]
+    # }
+    # }
 
     parameters_dict = {
     'k': {
-        'values': [15, 20, 25, 30]
+        'values': [55]
         },
     'LLM': {
-        'values': ["Mistral-7B-Instruct-v0.2", "Llama-2-13b-chat-hf"]
+        'values': ["Mistral-7B-Instruct-v0.2"] #"Mistral-7B-Instruct-v0.2"
         },
     'Cross_Encoder_rerank': {
         'values' : ["No","Yes"]
         },
     'Retrieval_type': {
-        'values' : ["Query","HYDE"]
+        'values' : ["Query"]
     }
     }
+
+    # parameters_dict = {
+    # 'k': {
+    #     'values': [25]
+    #     },
+    # 'LLM': {
+    #     'values': ["Llama-2-13b-chat-hf"] #"Mistral-7B-Instruct-v0.2"
+    #     },
+    # 'Cross_Encoder_rerank': {
+    #     'values' : ["Yes"]
+    #     },
+    # 'Retrieval_type': {
+    #     'values' : ["Query"]
+    # }
+    # }
 
     sweep_config['parameters'] = parameters_dict    
 
     #Initialise sweep
-    sweep_id = wandb.sweep(sweep_config, project="FW_1555_sweep_4")
+    sweep_id = wandb.sweep(sweep_config, project="FW_1777_CER_LongContext")
 
-    wandb.agent(sweep_id, train_sweeps, count=5)
+    wandb.agent(sweep_id, train_sweeps)
 
 if __name__ == "__main__":
 
-    prompt = "Tell me which locations received a flood weather warning?"
-    predictions_response(prompt)
+    # prompt = "Which locations received a flood weather warning?"
+    # predictions_response(prompt)
 
 
-    # run_sweep()
+    run_sweep()
 
 
 

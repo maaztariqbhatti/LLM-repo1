@@ -36,6 +36,7 @@ from langchain_community.document_transformers import (
 from sentence_transformers import CrossEncoder
 import streamlit as st
 import datetime
+import prompts
 
 dataPath = "FSD1777_Oct23.json"
 dotenv.load_dotenv()
@@ -87,15 +88,10 @@ class InputAdapterChain(Chain):
 
 
 class PromptFactory():
-    location_template = """You are a very smart location entity extracter with good knowledge of all the locations in the world. \
-    You answer questions related to location extraction.\
-    Your response only contains location names such as country, province, city, town, zip code, roads, rivers, seas, oceans.\
-
-    Question:{question}
-    Context: {context}"""
+    location_template = prompts.prompt_template_llama_loc
 
     human_template = """You are a data analyst that detects the number of human casualties mentioned within the context provided.\
-    You provide a sum of deaths. \
+    You provide a sum of deaths and sum of injuries seperately. \
     You also provide a sum of injuries. \
     You provide answers for deaths and injuries seperatley as a number. If no deaths are mentioned return 0 deaths. If no injuries are mentioned return 0 injuries\
 
@@ -111,7 +107,7 @@ class PromptFactory():
         },
         {
             'name': 'human casualties detector',
-            'description': 'Good for summing up the number of casualties such as deaths and injuries',
+            'description': 'Good for summing up the number of casualties such as deaths and injuries within a context',
             'prompt_template': human_template
         },
 
