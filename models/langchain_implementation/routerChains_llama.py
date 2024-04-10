@@ -39,7 +39,8 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import transformers
 from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
-
+import prompts
+import llmModels
 dataPath = "FSD1777_Oct23.json"
 
 
@@ -60,26 +61,14 @@ def loadLlamma():
     local_model = AutoModelForCausalLM.from_pretrained(save_path, return_dict=True, trust_remote_code=True, device_map="auto",torch_dtype=torch.bfloat16).to("cuda")
     local_tokenizer = AutoTokenizer.from_pretrained(save_path)
 
-
-    # pipeline = transformers.pipeline(
-    #         task = "text-generation",
-    #         model = local_model,
-    #         return_full_text = True,
-    #         tokenizer = local_tokenizer,
-    #         temperature = 0.01,
-    #         do_sample = True,
-    #         top_k = 5,
-    #         num_return_sequences = 1,
-    #         max_length = 4000,
-    #         eos_token_id = local_tokenizer.eos_token_id
-    #     )
     pipeline = transformers.pipeline(
             task = "text-generation",
             model = local_model,
             return_full_text = True,
             tokenizer = local_tokenizer,
             temperature = 0.1,
-            max_new_tokens = 560
+            max_new_tokens = 512,
+            repetition_penalty=1.1
         )
 
     chatModel= HuggingFacePipeline(pipeline=pipeline)
@@ -88,9 +77,7 @@ def loadLlamma():
 
 @st.cache_resource
 def loadMistral7b():
-    device = "cuda" # the device to load the model onto
-
-    model_m7b = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", device_map="auto",torch_dtype=torch.bfloat16,trust_remote_code = True).to("cuda")
+    model_m7b = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", device_map="auto", torch_dtype=torch.bfloat16, trust_remote_code = True).to("cuda")
     tokenizer_m7b = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")
 
     pipeline_m7b = transformers.pipeline(
@@ -99,8 +86,8 @@ def loadMistral7b():
             return_full_text = True,
             tokenizer = tokenizer_m7b,
             do_sample = True,
-            temperature = 0.2,
-            max_new_tokens = 560
+            temperature = 0.1,
+            max_new_tokens = 512
         )
     chatModel= HuggingFacePipeline(pipeline=pipeline_m7b)
 
@@ -111,17 +98,18 @@ def loadMistral7b():
 def loadOpenAI():
     dotenv.load_dotenv()
     chatModelOpenAI = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0.5)
-
     return chatModelOpenAI
 
 #Load the models
 # torch.cuda.empty_cache()
-chatModel = loadLlamma()
-chatModelOpenAI = loadOpenAI()
-chatMistral = loadMistral7b()
 
-system_prompt = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
-If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."""
+dotenv.load_dotenv()
+
+chatModelAI = ChatOpenAI()
+chatModel = loadLlamma()
+# chatMistral = loadMistral7b()
+
+
 
 class DKMultiPromptChain (MultiRouteChain):
     destination_chains: Mapping[str, Chain]
@@ -169,32 +157,23 @@ class InputAdapterChain(Chain):
 
 
 class PromptFactory():
-    location_template = """<s>[INST] <<SYS>>You are a very smart location entity extracter with good knowledge of all the locations in the world. If you don't know the answer to a question, please don't share false information.
-    Your response only contains location names such as country, province, city, town, zip code, roads, rivers, seas.<<SYS>>  
-    Answer question according to the following context only!
-    Context: {context}
-    Question:{question}[/INST]"""
+    location_template = prompts.prompt_template_llama_loc
 
+    numbers_template = prompts.prompt_template_human
 
-    numbers_template = """<s>[INST] <<SYS>>Your are an expert at detecting and extracting number of casualties such as deaths and injuries within sentences. Your provide a summary of the context provided!
-    <<SYS>> 
-    Answer question according to the following context only!
-    Context: {context}
-    Question:{question}[/INST]"""
-
+    geocode_template = prompts.prompt_template_geocode
 
     prompt_infos = [
         {
-            'name': 'casualties_detector',
-            'description': 'Good for summarizing number based questions such as number of deaths, injuries, property damages etc',
+            'name': 'human_casualties_detector',
+            'description': 'Good for summing up the number of casualties such as deaths and injuries within a context',
             'prompt_template': numbers_template
         },
         {
-            'name': 'location_extractor',
-            'description': 'Good for extracting locations from a context',
+            'name': 'flood_location_extractor',
+            'description': 'Good for extracting flooded locations from a context',
             'prompt_template': location_template
         }
-
     ]
 
 class CustomRetriever(VectorStoreRetriever):
@@ -235,6 +214,9 @@ class CustomRetriever(VectorStoreRetriever):
         #Sort documents according to score
         sorted_docs = sorted(docs, key=lambda doc: doc.metadata.get('cross-encoder_score'), reverse=True)
 
+        # #Remove 5 worst performing docs from the list 
+        sorted_docs = sorted_docs[:-5]
+
         #Re order according to long text re-order (Important context in start and end)
         reordering = LongContextReorder()
         reordered_docs = reordering.transform_documents(sorted_docs)
@@ -273,6 +255,9 @@ class LangChain_analysis:
         df = df[df['date'] >= threshold_datetime_lower]
         df = df[df['date'] <= threshold_datetime_upper]
 
+        #Remove duplicates
+        df  = df.drop_duplicates(subset=["text"], keep=False)
+
         #Pre-process
         preprocess = Text_preprocessing(df)
         df = preprocess.preprocess()
@@ -292,11 +277,8 @@ class LangChain_analysis:
         return model
     
     def hydeEmbedder(self,embeddingsModel):
-        model = chatMistral
-
-        prompt_template  = """[INST]Act as a twitter bot who is an expert at generating tweets.
-        Follow the instruction and generate possible tweets related to the question.
-        Question: {question}[/INST]"""
+        model = chatModelAI
+        prompt_template  = prompts.prompt_template_HyDE_OpenAI
         prompt = PromptTemplate(input_variables=["question"], template= prompt_template)
         llm_chain_hyde  = LLMChain(llm = model, prompt=prompt)
 
@@ -320,6 +302,14 @@ class LangChain_analysis:
         loader = DataFrameLoader(data, page_content_column="text")
         documents.extend(loader.load())
 
+        #Change this -- removal of duplicates
+        db = Chroma.Chroma.from_documents(documents,embeddings)
+        if db._client.list_collections() != None:
+            for collection in db._client.list_collections():
+                ids = collection.get()['ids']
+                print('REMOVE %s document(s) from %s collection' % (str(len(ids)), collection.name))
+                if len(ids): collection.delete(ids)
+
         #Create a vector store
         db = Chroma.Chroma.from_documents(documents,embeddings)
 
@@ -335,7 +325,7 @@ class LangChain_analysis:
         
         #Get retriever
         if rerank == True:
-            retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k}))
+            retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k+5}))
         else:
             retriever = vectorstore.as_retriever(search_kwargs={'k': k})
 
@@ -366,9 +356,7 @@ class LangChain_analysis:
             destination_chains[name] = adapted_chain
 
         #Default chain and prompt
-        default_prompt_template = """<s>[INST] <<SYS>>You are a helpful, respectful and honest assistant. If you don't know the answer to a question, please don't share false information.<<SYS>> 
-        Answer the question based only on the following tweet's context only: {context}
-        Question: {question}[/INST]"""
+        default_prompt_template = prompts.prompt_template_default
         default_prompt = PromptTemplate(template = default_prompt_template, input_variables = ['question', 'context'])
         default_chain = RetrievalQA.from_chain_type(llm = model,
                                 chain_type='stuff',
@@ -389,7 +377,7 @@ class LangChain_analysis:
             output_parser=RouterOutputParser()
         )
 
-        router_chain = LLMRouterChain.from_llm(chatModelOpenAI, router_prompt)
+        router_chain = LLMRouterChain.from_llm(chatModelAI, router_prompt)
 
         chain = MultiPromptChain(
             router_chain = router_chain,
@@ -466,9 +454,14 @@ if __name__ == "__main__":
     #Predefined prompts
     col1, col2, col3, col4 = st.columns([1,1,1,1])
     with col1:
-        floodLoc = st.button("Find flooded locations")
+        floodLoc = st.button("Flood warnings")
     with col2:
         roadsClosure = st.button("Find roads closure")
+    with col3:
+        evacuation = st.button("Evacuation orders")
+    with col4:
+        casualties = st.button("Human casualties")
+    
 
     st_input = st.chat_input("Talk to me")
 
@@ -482,10 +475,14 @@ if __name__ == "__main__":
             st.markdown(message["content"])
         
     if floodLoc == True:
-        hard_prompt = "Which places/location's received a flood weather warning or evacuation orders?"
+        hard_prompt = "Which locations received a flood warning?"
         st_input = hard_prompt
     if roadsClosure == True:
-        st_input = "Is there a mention of closure of roads? If so which roads/highways are shut down due to flooding?"
+        st_input = "Is there mention of closure of roads? If yes which roads/highways are shut down due to flooding?"
+    if evacuation == True:
+        st_input = "Which locations have evacuation orders?"
+    if casualties == True:
+        st_input = "Reported deaths due to flood?"
 
     # React to user input
     if prompt := st_input:
