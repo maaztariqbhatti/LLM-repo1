@@ -61,8 +61,8 @@ dotenv.load_dotenv()
 #Open AI
 chatModelAI = ChatOpenAI()
 
-# # Llama 2 13 B chat
-# chatModel_llama13b = llmModels.loadLlamma()
+# # # Llama 2 13 B chat
+chatModel_llama13b = llmModels.loadLlamma()
 
 # # Mistral 7B chat
 chatModel_mistral7b = llmModels.loadMistral7b()
@@ -276,9 +276,9 @@ def train_sweeps(config = None):
             retriever = vectorstore.as_retriever(search_kwargs={'k': config.k})
 
         #  LLM initialisation
-        # if (config.LLM == "Llama-2-13b-chat-hf"):
-        #     model = chatModel_llama13b  
-        #     default_prompt = PromptTemplate(template = prompts.prompt_template_llama_loc, input_variables = ['question', 'context'])
+        if (config.LLM == "Llama-2-13b-chat-hf"):
+            model = chatModel_llama13b  
+            default_prompt = PromptTemplate(template = prompts.prompt_template_llama_loc, input_variables = ['question', 'context'])
 
         if (config.LLM == "Mistral-7B-Instruct-v0.2"):
             model = chatModel_mistral7b
@@ -352,35 +352,35 @@ def run_sweep():
         'method': 'grid'
     }
 
-    # parameters_dict = {
-    # 'k': {
-    #     'values': [15, 20 ,25]
-    #     },
-    # 'LLM': {
-    #     'values': ["Llama-2-70b-chat-hf"]
-    #     },
-    # 'Cross_Encoder_rerank': {
-    #     'values' : ["Yes", "No"]
-    #     },
-    # 'Retrieval_type': {
-    #     'values' : ["Query", "HYDE"]
-    # }
-    # }
-
     parameters_dict = {
     'k': {
-        'values': [55]
+        'values': [50]
         },
     'LLM': {
-        'values': ["Mistral-7B-Instruct-v0.2"] #"Mistral-7B-Instruct-v0.2"
+        'values': ["Llama-2-13b-chat-hf", "Mistral-7B-Instruct-v0.2"]
         },
     'Cross_Encoder_rerank': {
-        'values' : ["No","Yes"]
+        'values' : ["No"]
         },
     'Retrieval_type': {
         'values' : ["Query"]
     }
     }
+
+    # parameters_dict = {
+    # 'k': {
+    #     'values': [55]
+    #     },
+    # 'LLM': {
+    #     'values': ["Mistral-7B-Instruct-v0.2", "Mistral-7B-Instruct-v0.2"] #"Mistral-7B-Instruct-v0.2"
+    #     },
+    # 'Cross_Encoder_rerank': {
+    #     'values' : ["No","Yes"]
+    #     },
+    # 'Retrieval_type': {
+    #     'values' : ["Query"]
+    # }
+    # }
 
     # parameters_dict = {
     # 'k': {
@@ -400,7 +400,7 @@ def run_sweep():
     sweep_config['parameters'] = parameters_dict    
 
     #Initialise sweep
-    sweep_id = wandb.sweep(sweep_config, project="FW_1777_CER_LongContext")
+    sweep_id = wandb.sweep(sweep_config, project="FW_1777_AER_LongContext_LLMs")
 
     wandb.agent(sweep_id, train_sweeps)
 
