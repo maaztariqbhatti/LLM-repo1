@@ -37,7 +37,8 @@ def loadLlamma():
             model = local_model,
             return_full_text = True,
             tokenizer = local_tokenizer,
-            temperature = 0.1,
+            # temperature = 0.1,
+            do_sample = False,
             max_new_tokens = 512,
             repetition_penalty=1.1
         )
@@ -114,6 +115,40 @@ def loadLlama2_70B():
     temperature=0.1,  # 'randomness' of outputs, 0.0 is the min and 1.0 the max
     max_new_tokens=512,  # mex number of tokens to generate in the output
     repetition_penalty=1.1  # without this output begins repeating,
+    )
+
+    chatModel= HuggingFacePipeline(pipeline=pipeline)
+
+    return chatModel
+
+#Llama2-70B-Chat
+def loadLlama3_8B():
+
+    model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
+    torch.backends.cuda.enable_mem_efficient_sdp(False)
+    torch.backends.cuda.enable_flash_sdp(False)
+
+    model = AutoModelForCausalLM.from_pretrained(
+        model_id,
+        torch_dtype=torch.bfloat16,
+        device_map="auto").to("cuda")
+
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+
+    terminators = [
+    tokenizer.eos_token_id,
+    tokenizer.convert_tokens_to_ids("<|eot_id|>")
+    ]
+
+    pipeline = transformers.pipeline(
+    model=model, 
+    tokenizer=tokenizer,
+    eos_token_id=terminators,
+    return_full_text=True,  # langchain expects the full text
+    task='text-generation',
+    do_sample=False,
+    # temperature=0.0,  # 'randomness' of outputs, 0.0 is the min and 1.0 the max
+    max_new_tokens=512  # mex number of tokens to generate in the output
     )
 
     chatModel= HuggingFacePipeline(pipeline=pipeline)

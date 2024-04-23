@@ -66,7 +66,6 @@ Output the answer only in json using the following json format : {{"locations" :
 
 #Flooded locations
 prompt_template_mistral = """You are a researcher tasked with answering questions about location extraction. If you dont know the answer then dont respond with false information.
-Output answer as list of locations only such as country, province, city, town, roads, rivers, seas, prefectures etc.
 Answer the question based on the following context only: 
 {context}
 question: {question}
@@ -91,3 +90,14 @@ Output the answer as geographic coordinate in the format : [latitude, longitude]
 question: {question}
 [/INST]
 [latitude, longitude]: """
+
+
+## LLama 3 prompt templates
+prompt_template_llama3_loc = """<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+
+You are a researcher tasked with answering questions about location extraction. If you dont know the answer then dont respond with false information.
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Answer the question based on the following context only: 
+{context}
+question: {question}
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>"""

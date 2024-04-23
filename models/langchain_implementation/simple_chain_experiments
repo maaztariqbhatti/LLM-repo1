@@ -1,30 +1,19 @@
-from langchain_community.document_loaders.csv_loader import CSVLoader
 import os
-from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
-from langchain.chains import ConversationChain, LLMChain, LLMRouterChain, MultiPromptChain, HypotheticalDocumentEmbedder, RetrievalQA
+from langchain.chains import LLMChain, LLMRouterChain, MultiPromptChain, HypotheticalDocumentEmbedder, RetrievalQA
 import dotenv
-from langchain import hub
-import langchainhub
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+from langchain_core.prompts import PromptTemplate
 from typing import Optional
 import json
 import pandas as pd
 from Text_preprocessing import Text_preprocessing
 from langchain_community.document_loaders import DataFrameLoader
-from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
-from langchain_core.runnables import RunnableParallel, RunnablePassthrough
-from pydantic.v1 import BaseModel
 from typing import List, Dict, Any, Mapping
 from langchain.globals import set_debug
-from langchain.chains.router.base import MultiRouteChain
-from langchain.chains.router.llm_router import LLMRouterChain, RouterOutputParser
+
 from langchain.chains.router.multi_prompt_prompt import MULTI_PROMPT_ROUTER_TEMPLATE
-from langchain.chains.base import Chain
-from langchain.callbacks.manager import (
-    CallbackManagerForChainRun,
-)
+
 from langchain_community.vectorstores import chroma as Chroma
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from langchain_core.vectorstores import VectorStoreRetriever
@@ -48,27 +37,30 @@ from ragas.metrics import (
     context_entity_recall
 )
 import llmModels 
-# from ragas.llms import LangchainLLMWrapper
 import wandb
 import pickle
 import prompts
 import groundTruths
-import sentence_transformers
-# 1. Start a W&B Run
+
 
 dotenv.load_dotenv()
+
+### PARAMETER CHECKPOINT ####
 
 #Open AI
 chatModelAI = ChatOpenAI()
 
-# # # Llama 2 13 B chat
-chatModel_llama13b = llmModels.loadLlamma()
+# # # # Llama 2 13 B chat
+# chatModel_llama13b = llmModels.loadLlamma()
 
-# # Mistral 7B chat
-chatModel_mistral7b = llmModels.loadMistral7b()
+# # # Mistral 7B chat
+# chatModel_mistral7b = llmModels.loadMistral7b()
 
 # #70B
 # chatModel_llama70b = llmModels.loadLlama2_70B()
+
+## Llama 3 8B
+chatModel_llama3_8B = llmModels.loadLlama3_8B()
 
 ##FSD_1777
 dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/FSD1777_Oct23.json"
@@ -137,7 +129,6 @@ def json_dataloader(dataPath = dataPath, dateFrom = dateFrom, dateTo = dateTo):
 
     #Remove duplicates
     df  = df.drop_duplicates(subset=["text"], keep=False)
-
     #Pre-process
     preprocess = Text_preprocessing(df)
     df = preprocess.preprocess()
@@ -220,16 +211,16 @@ def data_embedding(data : list, eModel = "bge-large-en-v1.5", rType = "Query"):
     return db
 
 """For running a single query"""
-def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query", rerank = True,k = 20):
+def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query", rerank = True,k = 25):
     
     #  LLM initialisation
-    model = chatModel_llama13b
+    model = chatModel_llama3_8B
 
     # Load the data from source
-    # data = json_dataloader()
+    data = json_dataloader()
 
     # Loading pandas dataframe from picke file
-    data = dataframe_dataloader()
+    # data = dataframe_dataloader()
 
     # Convert to vector store
     vectorstore = data_embedding(data, eModel= eModel, rType= rType)
@@ -241,7 +232,7 @@ def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query"
         retriever = vectorstore.as_retriever(search_kwargs={'k': k})
 
 
-    default_prompt = PromptTemplate(template = prompts.prompt_template_mistral, input_variables = ['question', 'context'])
+    default_prompt = PromptTemplate(template = prompts.prompt_template_llama3_loc, input_variables = ['question', 'context'])
     default_chain = RetrievalQA.from_chain_type(llm = model,
                             chain_type='stuff',
                             retriever=retriever,
@@ -406,11 +397,10 @@ def run_sweep():
 
 if __name__ == "__main__":
 
-    # prompt = "Which locations received a flood weather warning?"
-    # predictions_response(prompt)
+    prompt = "Which places are specifically receving evacutaion orders?"
+    predictions_response(prompt)
+    # run_sweep()
 
-
-    run_sweep()
 
 
 
