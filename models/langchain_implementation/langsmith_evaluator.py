@@ -1,7 +1,6 @@
 import os
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
-from langchain.llms import openai
 from langchain.chains import LLMChain, LLMRouterChain, MultiPromptChain, HypotheticalDocumentEmbedder, RetrievalQA
 import dotenv
 from langchain_core.prompts import PromptTemplate
@@ -43,6 +42,13 @@ import pickle
 import prompts
 import groundTruths
 
+from langsmith import Client
+from langsmith.schemas import Run, Example
+from langsmith.evaluation import evaluate
+import openai
+# from langsmith.wrappers import wrap_openai
+
+
 dotenv.load_dotenv()
 
 ### PARAMETER CHECKPOINT ####
@@ -57,15 +63,15 @@ chatModelAI = ChatOpenAI()
 # chatModel_mistral7b = llmModels.loadMistral7b()
 
 # #70B
-chatModel_llama70b = llmModels.loadLlama2_70B()
+# chatModel_llama70b = llmModels.loadLlama2_70B()
 
 ## Llama 3 8B
-# chatModel_llama3_8B = llmModels.loadLlama3_8B()
+chatModel_llama3_8B = llmModels.loadLlama3_8B()
 
 ##FSD_1777
 dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/FSD1777_Oct23.json"
 dateFrom = "2023-10-19T09:00:00+00:00" #2023-10-19T18:58:41Z for 200 tweets
-dateTo = "2023-10-19T17:00:00+00:00"
+dateTo = "2023-10-19T18:50:00+00:00"
 
 ##FSD_1555
 # dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/fsd_1555_0601_21_59_22TO23_59_59.pkl"
@@ -183,15 +189,8 @@ def hydeEmbedder(embeddingsModel):
                                                 verbose=True)
     return embeddings
 
-def multiGen_hydeEmbedder(embeddingsModel):
-    multi_llm = openai.OpenAI(n=4, best_of=4)
-#
-    embeddings = HypotheticalDocumentEmbedder.from_llm(
-        multi_llm, embeddingsModel, "web_search"
-    )
-    return embeddings
 
-def data_embedding(data : list, eModel = "bge-large-en-v1.5", rType = "Query", metric = "L2"):
+def data_embedding(data : list, eModel = "bge-large-en-v1.5", rType = "Query"):
     """Vectorize the data using OpenAI embeddings and store in Chroma db"""
     if eModel != "bge-large-en-v1.5":
         embeddings = OpenAIEmbeddings()
@@ -199,7 +198,7 @@ def data_embedding(data : list, eModel = "bge-large-en-v1.5", rType = "Query", m
         embeddings = bgeEmbeddings()
     
     if (rType == "Hyde"):
-        embeddings = multiGen_hydeEmbedder(embeddings)
+        embeddings = hydeEmbedder(embeddings)
 
     documents = []
     loader = DataFrameLoader(data, page_content_column="text")
@@ -214,15 +213,13 @@ def data_embedding(data : list, eModel = "bge-large-en-v1.5", rType = "Query", m
             if len(ids): collection.delete(ids)
 
     #Create a vector store
-    if metric == "cosine":
-        db = Chroma.Chroma.from_documents(documents,embeddings, collection_metadata={"hnsw:space": "cosine"})
-    else:
-        db = Chroma.Chroma.from_documents(documents,embeddings)
+    db = Chroma.Chroma.from_documents(documents,embeddings)
     print(len(db._collection.get()['ids']))
     return db
 
+
 """For running a single query"""
-def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query", rerank = False,k = 30):
+def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query", rerank = False,k = 3):
     
     #  LLM initialisation
     model = chatModel_llama3_8B
@@ -230,27 +227,7 @@ def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query"
     # Load the data from source
     data = json_dataloader()
 
-    # ### remove brechin
-    # import spacy
-    # # Load the English language model
-    # nlp = spacy.load("en_core_web_lg")
-    # #Implementation on the dataframe
-    # # Predefined list of entities to match
-    # predefined_entities = ["Brechin"]
-
-    # # Function to extract entities from text
-    # def extract_entities(text):
-    #     doc = nlp(text)
-    #     return [ent.text for ent in doc.ents]
-
-    # # Iterate over the DataFrame and delete rows if entities match
-    # for index, row in data.iterrows():
-    #     entities = extract_entities(row["text"])
-    #     if any(entity in predefined_entities for entity in entities):
-    #         data.drop(index, inplace=True)
-
-
-    # Loading pandas dataframe from picke file
+    # Loading pandas dataframe from picke file - FSD-1555
     # data = dataframe_dataloader()
 
     # Convert to vector store
@@ -268,153 +245,86 @@ def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query"
                             chain_type='stuff',
                             retriever=retriever,
                             chain_type_kwargs={"prompt": default_prompt},
-                            return_source_documents=True
+                            return_source_documents = True
                             )
     
-    ans = default_chain.invoke(question)
-    print(ans['query'])
-    print(ans['result'])
-    print(ans['source_documents'])
+    return default_chain.invoke(question)
 
-def train_sweeps(config = None):
+def langsmith_eval():
 
-    with wandb.init(config=config):
-
-        config = wandb.config
-         
-        # # Load the data from source
-        data = json_dataloader()
-
-        # Loading pandas dataframe from picke file
-        # data = dataframe_dataloader()
-
-        #L2 or cosine distance metric
-        retrieval_distance_metric = config.Retrieval_distance_metric
+    client = Client()
+    datasetId = "5a50d25a-fa12-42c5-97bc-778f7ce96eaa"
+    # Define dataset: these are your test cases
+    dataset_name = "FSD_1777_preFloodpeak_evac"
+    # dataset = client.create_dataset(dataset_name, description="Evacuation orders for fsd_1777 pre flood peak.")
     
-        # Convert to vector store
-        if (config.Retrieval_type == "HYDE"):
-            vectorstore = data_embedding(data, rType="Hyde", metric= retrieval_distance_metric)
-        else:
-            vectorstore = data_embedding(data, metric= retrieval_distance_metric)
-
-        # Get retriever
-        if config.Cross_Encoder_rerank == "Yes":
-            retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': config.k+5}))
-        else:
-            retriever = vectorstore.as_retriever(search_kwargs={'k': config.k})
-
-        #  LLM initialisation
-        if (config.LLM == "Llama-2-13b-chat-hf"):
-            model = chatModel_llama13b  
-            default_prompt = PromptTemplate(template = prompts.prompt_template_llama_api, input_variables = ['question', 'context'])
-
-        if (config.LLM == "Mistral-7B-Instruct-v0.2"):
-            model = chatModel_mistral7b
-            default_prompt = PromptTemplate(template = prompts.prompt_template_mistral, input_variables = ['question', 'context'])
-
-        if (config.LLM == "Llama-2-70b-chat-hf"):
-            model = chatModel_llama70b  
-            default_prompt = PromptTemplate(template = prompts.prompt_template_llama_api, input_variables = ['question', 'context'])
-        
-        if (config.LLM == "Llama-3-8b-chat-hf"):
-            model = chatModel_llama3_8B
-            default_prompt = PromptTemplate(template = prompts.prompt_template_llama3_loc, input_variables = ['question', 'context'])
-
-        #Open AI template
-        # default_prompt_template = """Answer the question based only on the following tweet's context: {context}
-        # Question: {question}"""
-
-        
-        default_chain = RetrievalQA.from_chain_type(llm = model,
-                                chain_type='stuff',
-                                retriever=retriever,
-                                chain_type_kwargs={"prompt": default_prompt},
-                                return_source_documents=True
-                                )
-        
-        #Evaluation using RAGAS
-        questions = ["Which locations are receiving flood warnings?"]
-
-
-        #FSD_XXXX
-        ground_truths = [groundTruths.gt_FSD1777_peak_fw]
-        
-
-        answers = []
-        contexts = []
-
-        # Inference 
-        for query in questions:
-            response = default_chain.invoke(query)
-            answers.append(response['result'])
-            contexts.append([docs.page_content for docs in response['source_documents']])
-
-        # To dict
-        data = {
-            "question": questions,
-            "answer": answers,
-            "contexts": contexts,
-            "ground_truths": ground_truths
-        }
-
-        # Convert dict to dataset
-        dataset = Dataset.from_dict(data)
-
-        result = evaluate(
-        dataset = dataset, 
-        metrics=[
-        answer_correctness,
-        context_entity_recall,
+    # client.share_run
+    client.create_examples(
+        inputs=[
+            {"question": "Which locations are specifically receiving evacuation orders?"},
         ],
-        )
+        outputs=[
+            {"must_mention": ["evacuation"]}
+        ],
+        dataset_id=datasetId,
+    )
+    
+    # # Define AI system
+    # openai_client = wrap_openai(openai.Client())
+    def predict(inputs: dict) -> dict:
+        response  = predictions_response(inputs["question"])
+        return {"output": response['result']}
 
-        RAG_response = wandb.Table(columns=["Query", "Response", "Context"], data=[[questions, answers, contexts]])
+    # Define evaluators
+    def must_mention(run: Run, example: Example) -> dict:
+        prediction = run.outputs.get("output") or ""
+        required = example.outputs.get("must_mention") or []
+        score = all(phrase in prediction for phrase in required)
+        for phrase in required:
+            print(phrase)
+        return {"key":"must_mention", "score": score}
+    
+    def f1_score_summary_evaluator(runs: List[Run], examples: List[Example]) -> dict:
+        true_positives = 0
+        false_positives = 0
+        false_negatives = 0
+        for run, example in zip(runs, examples):
+            # Matches the output format of your dataset
+            reference = example.outputs["answer"]
+            # Matches the output dict in `predict` function below
+            prediction = run.outputs["prediction"]
+            if reference and prediction == reference:
+                true_positives += 1
+            elif prediction and not reference:
+                false_positives += 1
+            elif not prediction and reference:
+                false_negatives += 1
+        if true_positives == 0:
+            return {"key": "f1_score", "score": 0.0}
 
-        wandb.log({"GPT_f1_score": result['answer_correctness'],
-                   "GPT_context_entity_recall": result['context_entity_recall'],
-                    "RAG response": RAG_response
-                   })
-        #GPT_f1_score": result['answer_correctness'],
-        
+        precision = true_positives / (true_positives + false_positives)
+        recall = true_positives / (true_positives + false_negatives)
+        f1_score = 2 * (precision * recall) / (precision + recall)
+        return {"key": "f1_score", "score": f1_score}
 
-"""Run experiments"""
-def run_sweep():
-        # # 1. Sweep configurations
-    sweep_config = {
-        'method': 'grid'
-    }
-
-    parameters_dict = {
-    'k': {
-        'values': [30, 40, 50]
+    experiment_results = evaluate(
+        predict, # Your AI system
+        data=dataset_name, # The data to predict and grade over
+        evaluators=[must_mention], # The evaluators to score the results
+        experiment_prefix="evac_mentions", # A prefix for your experiment names to easily identify them
+        metadata={
+        "version": "1.0.0",
         },
-    'LLM': {
-        'values': ["Llama-2-70b-chat-hf"] #"Llama-2-13b-chat-hf"   # "Llama-2-70b-chat-hf" # "Llama-3-8b-chat-hf" #"Mistral-7B-Instruct-v0.2"
-        },
-    'Cross_Encoder_rerank': {
-        'values' : ["No"]
-        },
-    'Retrieval_type': {
-        'values' : ["Query"]
-    },
-    'Retrieval_distance_metric': {
-        'values' : ["L2"]
-    }
-    }
-
-    sweep_config['parameters'] = parameters_dict    
-
-    #Initialise sweep
-    sweep_id = wandb.sweep(sweep_config, project="FFSD_1777_Human_Eval") #FW_1777_AER_LongContext_LLMs
-
-    wandb.agent(sweep_id, train_sweeps)
+    )
 
 if __name__ == "__main__":
 
-    # prompt = "Which locations are receiving flood warnings?"
+    # prompt = "Which locations are specifically receving evacutaion orders?"
     # predictions_response(prompt)
 
-    run_sweep()
+    langsmith_eval()
+
+    # run_sweep()
 
                                                     
 

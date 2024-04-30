@@ -4,7 +4,7 @@ import torch
 
 device = "cuda" # the device to load the model onto
 
-model_m7b = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", device_map="auto",torch_dtype=torch.bfloat16,trust_remote_code = True).to("cuda")
+model_m7b = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2", device_map="auto",trust_remote_code = True).to("cuda")
 tokenizer_m7b = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")
 
 messages = [
