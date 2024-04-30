@@ -1,9 +1,9 @@
 #Hyde
-prompt_template_HyDE_OpenAI = """Act as a twitter bot and give a hypothetical answer to the given question. Dont include emojis in the output!
+prompt_template_HyDE_OpenAI = """Act as a twitter bot. Please write a passage to answer the question
     Question: {question}
-    Tweet: 
     """
 
+### LLAMA 2 ### 
 #Default chain 
 prompt_template_default = """<s>[INST] <<SYS>>You are a helpful, respectful and honest assistant. If you don't know the answer to a question, please don't share false information.<<SYS>> 
 Answer the question based only on the following tweet's context only: {context}
@@ -23,12 +23,14 @@ context: {context}
 #Llama template basic    
 prompt_template_llama_loc = """<s>[INST] <<SYS>>You are a researcher tasked with answering questions about location extraction. If you dont know the answer then dont respond with false information.
 Output answer as list of locations only such as country, province, city, town, roads, rivers, seas, prefectures etc.<</SYS>> 
-Answer the question based on the following context only: 
-{context}
+Answer the question based on the context only!
 question: {question}
+Context: 
+{context}
 [/INST]
 Locations:"""
-prompt_template_llama_api = """<s>[INST] <<SYS>>You are a researcher tasked with answering questions about location extraction. If you dont know the answer then dont respond with false information. Output answer as list of locations only such as country, province, city, town, roads, rivers, seas, prefectures etc.<</SYS>> 
+
+prompt_template_llama_api = """<s>[INST] <<SYS>>You are a location entity detector. Utilise the location entities given in the context to answer the user question as accurately as possible. Only consider location entities that are relevant to the user question. If you dont know the answer then dont respond with false information!<</SYS>> 
 Answer the question based on the following context only: 
 {context}
 question: {question}
@@ -65,20 +67,18 @@ Output the answer only in json using the following json format : {{"locations" :
 ###### MISTRAL ####################
 
 #Flooded locations
-prompt_template_mistral = """You are a researcher tasked with answering questions about location extraction. If you dont know the answer then dont respond with false information.
-Output answer as list of locations only such as country, province, city, town, roads, rivers, seas, prefectures etc.
+prompt_template_mistral = """You are a location entity detector. Utilise the location entities given in the context to answer the user question as accurately as possible. Only consider location entities that are relevant to the user question. If you dont know the answer then dont respond with false information!
 Answer the question based on the following context only: 
 {context}
 question: {question}
-[/INST]
-Locations: """
+[/INST]"""
 
 ll = """Output the answer only in JSON in the following format {{"locations : [answer]"}}"""
 
 
 # Human casualties 
-prompt_template_human = """<s>[INST] <<SYS>>You are a analyst tasked with answering questions about human casualties such as deaths and injuries. If you dont know the answer then dont respond with false information.
-You provide a sum of casualties. Seperate deaths and injuries in your answers where applicable<</SYS>> 
+prompt_template_human = """<s>[INST] You are a analyst tasked with answering questions about human casualties such as deaths and injuries. If you dont know the answer then dont respond with false information.
+You provide a sum of casualties. Seperate deaths and injuries in your answers where applicable
 Answer the question based on the following context only: 
 {context}
 question: {question}
@@ -91,3 +91,22 @@ Output the answer as geographic coordinate in the format : [latitude, longitude]
 question: {question}
 [/INST]
 [latitude, longitude]: """
+
+
+## LLama 3 prompt templates
+prompt_template_llama3_loc = """<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+You are a location entity detector. Utilise the location entities given in the context to answer the user question as accurately as possible. Only consider location entities that are relevant to the user question. If you dont know the answer then dont respond with false information!
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Answer the question based on the following context only: 
+{context}
+user question: {question}
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>"""
+
+prompt_template_llama3_default = """<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+
+You are a smart chatbot assistant. If you dont know the answer then dont respond with false information.
+<|eot_id|><|start_header_id|>user<|end_header_id|>
+Answer the question based on the following context only: 
+{context}
+question: {question}
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>"""

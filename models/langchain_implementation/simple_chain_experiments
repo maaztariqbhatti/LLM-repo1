@@ -1,30 +1,20 @@
-from langchain_community.document_loaders.csv_loader import CSVLoader
 import os
-from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
-from langchain.chains import ConversationChain, LLMChain, LLMRouterChain, MultiPromptChain, HypotheticalDocumentEmbedder, RetrievalQA
+from langchain.llms import openai
+from langchain.chains import LLMChain, LLMRouterChain, MultiPromptChain, HypotheticalDocumentEmbedder, RetrievalQA
 import dotenv
-from langchain import hub
-import langchainhub
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+from langchain_core.prompts import PromptTemplate
 from typing import Optional
 import json
 import pandas as pd
 from Text_preprocessing import Text_preprocessing
 from langchain_community.document_loaders import DataFrameLoader
-from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
-from langchain_core.runnables import RunnableParallel, RunnablePassthrough
-from pydantic.v1 import BaseModel
 from typing import List, Dict, Any, Mapping
 from langchain.globals import set_debug
-from langchain.chains.router.base import MultiRouteChain
-from langchain.chains.router.llm_router import LLMRouterChain, RouterOutputParser
+
 from langchain.chains.router.multi_prompt_prompt import MULTI_PROMPT_ROUTER_TEMPLATE
-from langchain.chains.base import Chain
-from langchain.callbacks.manager import (
-    CallbackManagerForChainRun,
-)
+
 from langchain_community.vectorstores import chroma as Chroma
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from langchain_core.vectorstores import VectorStoreRetriever
@@ -48,32 +38,34 @@ from ragas.metrics import (
     context_entity_recall
 )
 import llmModels 
-# from ragas.llms import LangchainLLMWrapper
 import wandb
 import pickle
 import prompts
 import groundTruths
-import sentence_transformers
-# 1. Start a W&B Run
 
 dotenv.load_dotenv()
+
+### PARAMETER CHECKPOINT ####
 
 #Open AI
 chatModelAI = ChatOpenAI()
 
-# # Llama 2 13 B chat
+# # # # Llama 2 13 B chat
 # chatModel_llama13b = llmModels.loadLlamma()
 
-# # Mistral 7B chat
-chatModel_mistral7b = llmModels.loadMistral7b()
+# # # Mistral 7B chat
+# chatModel_mistral7b = llmModels.loadMistral7b()
 
 # #70B
-# chatModel_llama70b = llmModels.loadLlama2_70B()
+chatModel_llama70b = llmModels.loadLlama2_70B()
+
+## Llama 3 8B
+# chatModel_llama3_8B = llmModels.loadLlama3_8B()
 
 ##FSD_1777
 dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/FSD1777_Oct23.json"
-dateFrom = "2023-10-19T18:58:41+00:00" #2023-10-19T18:58:41Z for 200 tweets
-dateTo = "2023-10-19 23:58:47+00:00"
+dateFrom = "2023-10-19T09:00:00+00:00" #2023-10-19T18:58:41Z for 200 tweets
+dateTo = "2023-10-19T17:00:00+00:00"
 
 ##FSD_1555
 # dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/fsd_1555_0601_21_59_22TO23_59_59.pkl"
@@ -106,7 +98,7 @@ class CustomRetriever(VectorStoreRetriever):
         sorted_docs = sorted(docs, key=lambda doc: doc.metadata.get('cross-encoder_score'), reverse=True)
 
         # #Remove 10 worst performing docs from the list 
-        sorted_docs = sorted_docs[:-10]
+        sorted_docs = sorted_docs[:-5]
 
         #Re order according to long text re-order (Important context in start and end)
         reordering = LongContextReorder()
@@ -137,7 +129,6 @@ def json_dataloader(dataPath = dataPath, dateFrom = dateFrom, dateTo = dateTo):
 
     #Remove duplicates
     df  = df.drop_duplicates(subset=["text"], keep=False)
-
     #Pre-process
     preprocess = Text_preprocessing(df)
     df = preprocess.preprocess()
@@ -192,8 +183,15 @@ def hydeEmbedder(embeddingsModel):
                                                 verbose=True)
     return embeddings
 
+def multiGen_hydeEmbedder(embeddingsModel):
+    multi_llm = openai.OpenAI(n=4, best_of=4)
+#
+    embeddings = HypotheticalDocumentEmbedder.from_llm(
+        multi_llm, embeddingsModel, "web_search"
+    )
+    return embeddings
 
-def data_embedding(data : list, eModel = "bge-large-en-v1.5", rType = "Query"):
+def data_embedding(data : list, eModel = "bge-large-en-v1.5", rType = "Query", metric = "L2"):
     """Vectorize the data using OpenAI embeddings and store in Chroma db"""
     if eModel != "bge-large-en-v1.5":
         embeddings = OpenAIEmbeddings()
@@ -201,7 +199,7 @@ def data_embedding(data : list, eModel = "bge-large-en-v1.5", rType = "Query"):
         embeddings = bgeEmbeddings()
     
     if (rType == "Hyde"):
-        embeddings = hydeEmbedder(embeddings)
+        embeddings = multiGen_hydeEmbedder(embeddings)
 
     documents = []
     loader = DataFrameLoader(data, page_content_column="text")
@@ -216,20 +214,44 @@ def data_embedding(data : list, eModel = "bge-large-en-v1.5", rType = "Query"):
             if len(ids): collection.delete(ids)
 
     #Create a vector store
-    db = Chroma.Chroma.from_documents(documents,embeddings)
+    if metric == "cosine":
+        db = Chroma.Chroma.from_documents(documents,embeddings, collection_metadata={"hnsw:space": "cosine"})
+    else:
+        db = Chroma.Chroma.from_documents(documents,embeddings)
+    print(len(db._collection.get()['ids']))
     return db
 
 """For running a single query"""
-def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query", rerank = True,k = 20):
+def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query", rerank = False,k = 30):
     
     #  LLM initialisation
-    model = chatModel_llama13b
+    model = chatModel_llama3_8B
 
     # Load the data from source
-    # data = json_dataloader()
+    data = json_dataloader()
+
+    # ### remove brechin
+    # import spacy
+    # # Load the English language model
+    # nlp = spacy.load("en_core_web_lg")
+    # #Implementation on the dataframe
+    # # Predefined list of entities to match
+    # predefined_entities = ["Brechin"]
+
+    # # Function to extract entities from text
+    # def extract_entities(text):
+    #     doc = nlp(text)
+    #     return [ent.text for ent in doc.ents]
+
+    # # Iterate over the DataFrame and delete rows if entities match
+    # for index, row in data.iterrows():
+    #     entities = extract_entities(row["text"])
+    #     if any(entity in predefined_entities for entity in entities):
+    #         data.drop(index, inplace=True)
+
 
     # Loading pandas dataframe from picke file
-    data = dataframe_dataloader()
+    # data = dataframe_dataloader()
 
     # Convert to vector store
     vectorstore = data_embedding(data, eModel= eModel, rType= rType)
@@ -241,15 +263,18 @@ def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query"
         retriever = vectorstore.as_retriever(search_kwargs={'k': k})
 
 
-    default_prompt = PromptTemplate(template = prompts.prompt_template_mistral, input_variables = ['question', 'context'])
+    default_prompt = PromptTemplate(template = prompts.prompt_template_llama3_loc, input_variables = ['question', 'context'])
     default_chain = RetrievalQA.from_chain_type(llm = model,
                             chain_type='stuff',
                             retriever=retriever,
-                            chain_type_kwargs={"prompt": default_prompt}
+                            chain_type_kwargs={"prompt": default_prompt},
+                            return_source_documents=True
                             )
     
-    default_chain.invoke(question)
-
+    ans = default_chain.invoke(question)
+    print(ans['query'])
+    print(ans['result'])
+    print(ans['source_documents'])
 
 def train_sweeps(config = None):
 
@@ -263,11 +288,14 @@ def train_sweeps(config = None):
         # Loading pandas dataframe from picke file
         # data = dataframe_dataloader()
 
+        #L2 or cosine distance metric
+        retrieval_distance_metric = config.Retrieval_distance_metric
+    
         # Convert to vector store
         if (config.Retrieval_type == "HYDE"):
-            vectorstore = data_embedding(data, rType="Hyde")
+            vectorstore = data_embedding(data, rType="Hyde", metric= retrieval_distance_metric)
         else:
-            vectorstore = data_embedding(data)
+            vectorstore = data_embedding(data, metric= retrieval_distance_metric)
 
         # Get retriever
         if config.Cross_Encoder_rerank == "Yes":
@@ -276,19 +304,21 @@ def train_sweeps(config = None):
             retriever = vectorstore.as_retriever(search_kwargs={'k': config.k})
 
         #  LLM initialisation
-        # if (config.LLM == "Llama-2-13b-chat-hf"):
-        #     model = chatModel_llama13b  
-        #     default_prompt = PromptTemplate(template = prompts.prompt_template_llama_loc, input_variables = ['question', 'context'])
+        if (config.LLM == "Llama-2-13b-chat-hf"):
+            model = chatModel_llama13b  
+            default_prompt = PromptTemplate(template = prompts.prompt_template_llama_api, input_variables = ['question', 'context'])
 
         if (config.LLM == "Mistral-7B-Instruct-v0.2"):
             model = chatModel_mistral7b
             default_prompt = PromptTemplate(template = prompts.prompt_template_mistral, input_variables = ['question', 'context'])
 
-        # if (config.LLM == "Llama-2-70b-chat-hf"):
-        #     model = chatModel_llama70b  
-        #     default_prompt = PromptTemplate(template = prompts.prompt_template_llama_loc, input_variables = ['question', 'context'])
-
-
+        if (config.LLM == "Llama-2-70b-chat-hf"):
+            model = chatModel_llama70b  
+            default_prompt = PromptTemplate(template = prompts.prompt_template_llama_api, input_variables = ['question', 'context'])
+        
+        if (config.LLM == "Llama-3-8b-chat-hf"):
+            model = chatModel_llama3_8B
+            default_prompt = PromptTemplate(template = prompts.prompt_template_llama3_loc, input_variables = ['question', 'context'])
 
         #Open AI template
         # default_prompt_template = """Answer the question based only on the following tweet's context: {context}
@@ -298,15 +328,16 @@ def train_sweeps(config = None):
         default_chain = RetrievalQA.from_chain_type(llm = model,
                                 chain_type='stuff',
                                 retriever=retriever,
-                                chain_type_kwargs={"prompt": default_prompt}
+                                chain_type_kwargs={"prompt": default_prompt},
+                                return_source_documents=True
                                 )
         
         #Evaluation using RAGAS
-        questions = ["Which locations received a flood warning?"]
+        questions = ["Which locations are receiving flood warnings?"]
 
 
         #FSD_XXXX
-        ground_truths = groundTruths.ground_truths_FSD1777
+        ground_truths = [groundTruths.gt_FSD1777_peak_fw]
         
 
         answers = []
@@ -314,8 +345,9 @@ def train_sweeps(config = None):
 
         # Inference 
         for query in questions:
-            answers.append(default_chain.invoke(query)['result'])
-            contexts.append([docs.page_content for docs in retriever.get_relevant_documents(query)])
+            response = default_chain.invoke(query)
+            answers.append(response['result'])
+            contexts.append([docs.page_content for docs in response['source_documents']])
 
         # To dict
         data = {
@@ -338,11 +370,11 @@ def train_sweeps(config = None):
 
         RAG_response = wandb.Table(columns=["Query", "Response", "Context"], data=[[questions, answers, contexts]])
 
-        wandb.log({"answer_correctness": result['answer_correctness'],
-                    "context_entity_recall": result['context_entity_recall'],
-                    "retriever": vectorstore._collection.get()['ids'],
+        wandb.log({"GPT_f1_score": result['answer_correctness'],
+                   "GPT_context_entity_recall": result['context_entity_recall'],
                     "RAG response": RAG_response
                    })
+        #GPT_f1_score": result['answer_correctness'],
         
 
 """Run experiments"""
@@ -352,68 +384,37 @@ def run_sweep():
         'method': 'grid'
     }
 
-    # parameters_dict = {
-    # 'k': {
-    #     'values': [15, 20 ,25]
-    #     },
-    # 'LLM': {
-    #     'values': ["Llama-2-70b-chat-hf"]
-    #     },
-    # 'Cross_Encoder_rerank': {
-    #     'values' : ["Yes", "No"]
-    #     },
-    # 'Retrieval_type': {
-    #     'values' : ["Query", "HYDE"]
-    # }
-    # }
-
     parameters_dict = {
     'k': {
-        'values': [55]
+        'values': [30, 40, 50]
         },
     'LLM': {
-        'values': ["Mistral-7B-Instruct-v0.2"] #"Mistral-7B-Instruct-v0.2"
+        'values': ["Llama-2-70b-chat-hf"] #"Llama-2-13b-chat-hf"   # "Llama-2-70b-chat-hf" # "Llama-3-8b-chat-hf" #"Mistral-7B-Instruct-v0.2"
         },
     'Cross_Encoder_rerank': {
-        'values' : ["No","Yes"]
+        'values' : ["No"]
         },
     'Retrieval_type': {
         'values' : ["Query"]
+    },
+    'Retrieval_distance_metric': {
+        'values' : ["L2"]
     }
     }
-
-    # parameters_dict = {
-    # 'k': {
-    #     'values': [25]
-    #     },
-    # 'LLM': {
-    #     'values': ["Llama-2-13b-chat-hf"] #"Mistral-7B-Instruct-v0.2"
-    #     },
-    # 'Cross_Encoder_rerank': {
-    #     'values' : ["Yes"]
-    #     },
-    # 'Retrieval_type': {
-    #     'values' : ["Query"]
-    # }
-    # }
 
     sweep_config['parameters'] = parameters_dict    
 
     #Initialise sweep
-    sweep_id = wandb.sweep(sweep_config, project="FW_1777_CER_LongContext")
+    sweep_id = wandb.sweep(sweep_config, project="FFSD_1777_Human_Eval") #FW_1777_AER_LongContext_LLMs
 
     wandb.agent(sweep_id, train_sweeps)
 
 if __name__ == "__main__":
 
-    # prompt = "Which locations received a flood weather warning?"
+    # prompt = "Which locations are receiving flood warnings?"
     # predictions_response(prompt)
 
-
     run_sweep()
-
-
-
 
                                                     
 
