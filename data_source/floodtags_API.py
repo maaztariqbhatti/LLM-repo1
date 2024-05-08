@@ -11,8 +11,47 @@ import pandas as pd
 import geopandas as gpd
 import shapely
 from shapely.geometry.base import BaseGeometry
+from shapely.geometry import Point, LineString, MultiPoint, Polygon, MultiPolygon
 # from shapely.geometry import Point, LineString, MultiPoint, Polygon, MultiPolygon
 import warnings
+
+def _drop_out_of_bounds_results(evidence_dict : dict, aoi_geom_Oya: BaseGeometry) -> dict:
+    @cache
+    def _geometry_type_lookup_table() -> dict:
+        return {'Point': Point,
+                'LineString': LineString,
+                'MultiPoint': MultiPoint,
+                'Polygon': Polygon,
+                'MultiPolygon': MultiPolygon}
+
+    def _parse_geometry(geometry_dict : dict) -> BaseGeometry:
+        try:
+            geometry_class = _geometry_type_lookup_table()[geometry_dict['type']]
+        except KeyError:
+            raise KeyError('Could not find the geometry type %s in the lookup table.'%geometry_dict['type'])
+        return geometry_class(geometry_dict['coordinates'])
+
+    assert isinstance(evidence_dict, dict), \
+            'Expected input "evidence_dict" to be a dict, but a %s was input.'%type(evidence_dict)
+    assert isinstance(aoi_geom_Oya, BaseGeometry), \
+            'Expected input "aoi_geom" to be a shapely BaseGeometry object but a %s was input.'%type(aoi_geom_Oya)
+
+    valid_tags = []
+    for tag in evidence_dict["data"]["tags"]:
+        any_intersect = False
+        for location in tag['locations']:
+            if aoi_geom_Oya.contains(_parse_geometry(location['geometry'])):
+            # if _parse_geometry(location['geometry']).intersects(aoi_geom_Oya):
+                any_intersect = True
+                break
+
+        if any_intersect:
+            valid_tags.append(tag)
+
+    evidence_dict["data"]["tags"] = valid_tags
+    evidence_dict["total"] = len(valid_tags)
+
+    return evidence_dict
 
 @dataclass
 class FloodTagConfig:
@@ -96,6 +135,7 @@ class FloodTagsRetriever:
                             start_date: Optional[datetime] = None,
                             end_date: Optional[datetime] = None,
                             aoi_geom : Optional[BaseGeometry] = None,
+                            aoi_geom_Oya : Optional[BaseGeometry] = None,
                             sources : Optional[List[str]] = None,
                             flood_classes : Optional[List[str]] = None,
                             tags_paginator : int = 0) -> Optional[dict]:
@@ -219,13 +259,20 @@ class FloodTagsRetriever:
                 #self.stored_output.extend(new_output['data']['tags'])
 
         # full_output = self.stored_output
+
+        if aoi_geom_Oya is not None:
+            self.stored_output = _drop_out_of_bounds_results(self.stored_output, aoi_geom_Oya)
+
+        # return intersecting_output
+    
         return self.stored_output
 
 def analyze_watersheds(start_date : datetime,
                        end_date : datetime,
                        bbox : Tuple,
                        sources : List[str],
-                       flood_classes : List[str] = None) -> pd.DataFrame:
+                       flood_classes : List[str] = None,
+                       aoi_geom_Oya : Optional[BaseGeometry] = None, ) -> pd.DataFrame:
 
     flood_tags_retriever = FloodTagsRetriever()
     
@@ -233,6 +280,7 @@ def analyze_watersheds(start_date : datetime,
     tag_information_json = flood_tags_retriever.get_tag_information(start_date=start_date,
                                                                     end_date=end_date,
                                                                     aoi_geom=bbox,
+                                                                    aoi_geom_Oya = aoi_geom_Oya,
                                                                     sources =sources,
                                                                     flood_classes = flood_classes)
 
@@ -270,9 +318,9 @@ if __name__ == "__main__":
 
     # event_id = 736
 
-    start_date  = datetime(2023, 10, 16)
-    end_date = datetime(2023, 10, 18)
-    sources = ["english-flood"]
+    start_date  = datetime(2023, 6, 1)
+    end_date = datetime(2023, 6, 2)
+    sources = ["japanese-flood"]
     
 
     # flood_classes = ["class:flood-logistics",
@@ -280,11 +328,14 @@ if __name__ == "__main__":
     
     
     #Bounding box of the area of interest
-    bbox = [-5.855844,51.49784,2.369591,57.742844]
+    bbox = [129.438857, 30.100228, 141.185201, 37.513876]
+    geometry_1555_348 = [[141.185201,36.568398],[138.977445,37.513876],[136.070956,36.105],[129.747212,32.565316],[129.438857,30.175884],[130.731578,30.100228],[132.231846,32.33282],[140.865532,35.016103],[141.185201,36.568398]]
+    aoi_geom_Oya = shapely.Polygon(geometry_1555_348)
 
     response_dict = analyze_watersheds(start_date=start_date,
                                        end_date=end_date,
                                        sources= sources,
-                                       bbox= bbox)
+                                       bbox= bbox,
+                                       aoi_geom_Oya = aoi_geom_Oya)
 
     
