@@ -1,0 +1,248 @@
+{
+    "os": "Linux-5.11.0-38-generic-x86_64-with-glibc2.31",
+    "python": "3.11.7",
+    "heartbeatAt": "2024-04-30T12:33:09.333805",
+    "startedAt": "2024-04-30T12:33:08.664212",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/simple_chain_experiments",
+    "codePathLocal": "models/langchain_implementation/simple_chain_experiments",
+    "codePath": "models/langchain_implementation/simple_chain_experiments",
+    "git": {
+        "remote": "https://github.com/maaztariqbhatti/LLM-repo1.git",
+        "commit": "28b8416fd684f181d20e2ad4c021c7c5ee4dbb99"
+    },
+    "email": "maaz.bhatti@iceye.fi",
+    "root": "/home/mbhatti/mnt/d/LLM-repo1",
+    "host": "MLServer01",
+    "username": "mbhatti",
+    "executable": "/home/mbhatti/miniconda3/envs/llama/bin/python",
+    "cpu_count": 20,
+    "cpu_count_logical": 40,
+    "cpu_freq": {
+        "current": 1130.301025,
+        "min": 1000.0,
+        "max": 3400.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 1300.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1100.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1100.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1100.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1100.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1200.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1800.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 2029.678,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1100.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1600.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1200.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1100.0,
+            "min": 1000.0,
+            "max": 3400.0
+        },
+        {
+            "current": 1000.0,
+            "min": 1000.0,
+            "max": 3400.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 8865.72547531128,
+            "used": 6986.157905578613
+        }
+    },
+    "gpu": "Quadro RTX 8000",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "Quadro RTX 8000",
+            "memory_total": 51539607552
+        }
+    ],
+    "memory": {
+        "total": 92.9074935913086
+    }
+}

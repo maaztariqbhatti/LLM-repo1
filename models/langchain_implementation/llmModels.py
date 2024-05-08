@@ -19,6 +19,8 @@ def loadLlamma():
     local_model = AutoModelForCausalLM.from_pretrained(save_path, return_dict=True, trust_remote_code=True, device_map="auto",torch_dtype=torch.bfloat16).to("cuda")
     local_tokenizer = AutoTokenizer.from_pretrained(save_path)
 
+    local_model.generation_config.temperature=None
+    local_model.generation_config.top_p=None
 
     # pipeline = transformers.pipeline(
     #         task = "text-generation",
@@ -39,7 +41,8 @@ def loadLlamma():
             tokenizer = local_tokenizer,
             # temperature = 0.1,
             do_sample=False,
-            repetition_penalty=1.1
+            repetition_penalty=1.1,
+            max_new_tokens = 512
         )
 
     chatModel= HuggingFacePipeline(pipeline=pipeline)
@@ -107,7 +110,7 @@ def loadLlama2_70B():
     print(f"Model loaded on {device}")
 
     tokenizer = transformers.AutoTokenizer.from_pretrained("meta-llama/Llama-2-70b-chat-hf", token=hf_auth)
-    
+
     model.generation_config.temperature=None
     model.generation_config.top_p=None
 

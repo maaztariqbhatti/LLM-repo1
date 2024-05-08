@@ -1,0 +1,65 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    python_version: 3.11.7
+    cli_version: 0.16.5
+    framework: huggingface
+    huggingface_version: 4.40.1
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1714480388.0
+    t:
+      1:
+      - 1
+      - 5
+      - 11
+      - 49
+      - 51
+      - 53
+      - 55
+      - 71
+      - 75
+      - 86
+      - 95
+      - 105
+      2:
+      - 1
+      - 5
+      - 11
+      - 49
+      - 51
+      - 53
+      - 55
+      - 71
+      - 75
+      - 86
+      - 92
+      - 95
+      - 105
+      3:
+      - 2
+      - 23
+      - 37
+      4: 3.11.7
+      5: 0.16.5
+      6: 4.40.1
+      8:
+      - 5
+      13: linux-x86_64
+Cross_Encoder_rerank:
+  desc: null
+  value: 'No'
+LLM:
+  desc: null
+  value: Mistral-7B-Instruct-v0.2
+Retrieval_distance_metric:
+  desc: null
+  value: cosine
+Retrieval_type:
+  desc: null
+  value: Query
+k:
+  desc: null
+  value: 50

@@ -1,0 +1,7 @@
+
+REMOVE 480 document(s) from langchain collection
+480
+Setting `pad_token_id` to `eos_token_id`:2 for open-end generation.
+passing column names as 'ground_truths' is deprecated and will be removed in the next version, please use 'ground_truth' instead. Note that `ground_truth` should be of type string and not Sequence[string] like `ground_truths`
+
+Evaluating: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:03<00:00,  3.44s/it]

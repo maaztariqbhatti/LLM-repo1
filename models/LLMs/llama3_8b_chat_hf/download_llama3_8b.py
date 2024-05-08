@@ -17,25 +17,10 @@ model = AutoModelForCausalLM.from_pretrained(
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 
 messages = [
-    {"role": "system", "content": "You are a smart chat bot that only returns json output and nothing else"},
-    {"role": "user", "content": """
-    Question: From the following context extract all the location entities in the following json format : {{'flood_warning_locations' : ['location 1', 'location 2']}}
+    # {"role": "system", "content": "Act as a location extractor and extract all relevant locations with respect to the user question."},
 
-     Context: According to the provided context, the following locations are receiving flood warnings:
-
-    1. Angus Glens region in Scotland
-    2. Barbourne in Worcester, England
-    3. The River Maun near Retford, England
-    4. The coastlines at Bridlington and Scarborough in Yorkshire, England
-    5. The banks of the Tyne at North and South Shields in Newcastle, England
-    6. Brechin, Angus, Scotland (red alert and severe flood warning)
-    7. North Sea at North and South Shields (North Tyneside, South Tyneside)
-    8. River South Esk area, Angus, Scotland (severe flood warning)
-    9. North Wales (flood risk from heavy rain on Friday and early Saturday)
-    10. West and North Yorkshire (possible localised flooding)
-    11. Findhorn, Nairn, Moray, and Speyside region (localised flood warning)
-
-    Please note that this information is based on the provided context and may not be exhaustive or up-to-date. It is essential to check for the latest updates and follow official guidance from authorities for the most accurate and reliable information.
+    {"role": "user", "content": """Does the following tweet specifically mention evacuation orders:
+     More than 400 properties in Brechin in Angus – and in the villages of Tannadice and Finavon – have been told to leave their homes with flood defences expected to be breached within 24 hours.
     """},
 ]
 

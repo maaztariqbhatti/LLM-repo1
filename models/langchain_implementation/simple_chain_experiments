@@ -48,16 +48,16 @@ dotenv.load_dotenv()
 ### PARAMETER CHECKPOINT ####
 
 #Open AI
-chatModelAI = ChatOpenAI()
+chatModelAI = ChatOpenAI(temperature=0)
 
 # # # # Llama 2 13 B chat
 # chatModel_llama13b = llmModels.loadLlamma()
 
 # # # Mistral 7B chat
-# chatModel_mistral7b = llmModels.loadMistral7b()
+chatModel_mistral7b = llmModels.loadMistral7b()
 
 # #70B
-chatModel_llama70b = llmModels.loadLlama2_70B()
+# chatModel_llama70b = llmModels.loadLlama2_70B()
 
 ## Llama 3 8B
 # chatModel_llama3_8B = llmModels.loadLlama3_8B()
@@ -65,7 +65,7 @@ chatModel_llama70b = llmModels.loadLlama2_70B()
 ##FSD_1777
 dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/FSD1777_Oct23.json"
 dateFrom = "2023-10-19T09:00:00+00:00" #2023-10-19T18:58:41Z for 200 tweets
-dateTo = "2023-10-19T17:00:00+00:00"
+dateTo = "2023-10-19T18:00:00+00:00"
 
 ##FSD_1555
 # dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/fsd_1555_0601_21_59_22TO23_59_59.pkl"
@@ -98,7 +98,7 @@ class CustomRetriever(VectorStoreRetriever):
         sorted_docs = sorted(docs, key=lambda doc: doc.metadata.get('cross-encoder_score'), reverse=True)
 
         # #Remove 10 worst performing docs from the list 
-        sorted_docs = sorted_docs[:-5]
+        # sorted_docs = sorted_docs[:-5]
 
         #Re order according to long text re-order (Important context in start and end)
         reordering = LongContextReorder()
@@ -199,7 +199,7 @@ def data_embedding(data : list, eModel = "bge-large-en-v1.5", rType = "Query", m
         embeddings = bgeEmbeddings()
     
     if (rType == "Hyde"):
-        embeddings = multiGen_hydeEmbedder(embeddings)
+        embeddings = hydeEmbedder(embeddings)
 
     documents = []
     loader = DataFrameLoader(data, page_content_column="text")
@@ -258,7 +258,7 @@ def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query"
 
         # Get retriever
     if rerank == True:
-        retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k+5}))
+        retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k}))
     else:
         retriever = vectorstore.as_retriever(search_kwargs={'k': k})
 
@@ -299,7 +299,7 @@ def train_sweeps(config = None):
 
         # Get retriever
         if config.Cross_Encoder_rerank == "Yes":
-            retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': config.k+5}))
+            retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': config.k}))
         else:
             retriever = vectorstore.as_retriever(search_kwargs={'k': config.k})
 
@@ -334,10 +334,11 @@ def train_sweeps(config = None):
         
         #Evaluation using RAGAS
         questions = ["Which locations are receiving flood warnings?"]
-
+        #"Which locations are receiving flood warnings?"
+        #"Which locations are receiving evacuation orders?"
 
         #FSD_XXXX
-        ground_truths = [groundTruths.gt_FSD1777_peak_fw]
+        ground_truths = [groundTruths.gt_FSD1777_peak_evac]
         
 
         answers = []
@@ -365,7 +366,7 @@ def train_sweeps(config = None):
         metrics=[
         answer_correctness,
         context_entity_recall,
-        ],
+        ], 
         )
 
         RAG_response = wandb.Table(columns=["Query", "Response", "Context"], data=[[questions, answers, contexts]])
@@ -386,10 +387,10 @@ def run_sweep():
 
     parameters_dict = {
     'k': {
-        'values': [30, 40, 50]
+        'values': [30, 40 ,50]
         },
     'LLM': {
-        'values': ["Llama-2-70b-chat-hf"] #"Llama-2-13b-chat-hf"   # "Llama-2-70b-chat-hf" # "Llama-3-8b-chat-hf" #"Mistral-7B-Instruct-v0.2"
+        'values': ["Mistral-7B-Instruct-v0.2"] #"Llama-2-13b-chat-hf"   # "Llama-2-70b-chat-hf" # "Llama-3-8b-chat-hf" #"Mistral-7B-Instruct-v0.2"
         },
     'Cross_Encoder_rerank': {
         'values' : ["No"]
@@ -399,19 +400,22 @@ def run_sweep():
     },
     'Retrieval_distance_metric': {
         'values' : ["L2"]
+    },
+    'Analysis_question': {
+    'values' : ["FW_2"]
     }
     }
 
     sweep_config['parameters'] = parameters_dict    
 
     #Initialise sweep
-    sweep_id = wandb.sweep(sweep_config, project="FFSD_1777_Human_Eval") #FW_1777_AER_LongContext_LLMs
+    sweep_id = wandb.sweep(sweep_config, project="FSD_1777_Human_Eval_FW_P2") #FW_1777_AER_LongContext_LLMs #FFSD_1777_Human_Eval
 
     wandb.agent(sweep_id, train_sweeps)
 
 if __name__ == "__main__":
 
-    # prompt = "Which locations are receiving flood warnings?"
+    # prompt = """Which locations have received evacuation orders?"""
     # predictions_response(prompt)
 
     run_sweep()
