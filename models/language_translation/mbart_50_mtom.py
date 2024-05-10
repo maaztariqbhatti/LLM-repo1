@@ -26,7 +26,7 @@ tokenizer = MBart50TokenizerFast.from_pretrained("facebook/mbart-large-50-many-t
 # # => "The Secretary-General of the United Nations says there is no military solution in Syria."
 
 #Japanese to english
-article_ja = "愛知県田原市 極楽\u3000黒川\u3000大草町\u3000ほか ●氾濫開始水位超過 汐川 西野橋 汐川水系汐川 川の防災情報 6月2日(金)8時44分の情報"
+article_ja = "明日の関東地方は 大雨突風に要注意！ 線状降水帯による河川の氾濫 および用水路の増水に注意！！"
 tokenizer.src_lang = "ja_XX"
 encoded_hi = tokenizer(article_ja, return_tensors="pt")
 generated_tokens = model.generate(
