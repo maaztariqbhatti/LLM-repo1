@@ -3,6 +3,23 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 import transformers
 from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
 from torch import cuda, bfloat16
+from transformers import MBartForConditionalGeneration, MBart50TokenizerFast
+import torch
+
+#Language translation
+def bulk_translation(english_data, source_lan = "ja_XX", output_lan = "en_XX"):
+    model = MBartForConditionalGeneration.from_pretrained("facebook/mbart-large-50-many-to-many-mmt")# quantization_config=quantization_config)
+    tokenizer = MBart50TokenizerFast.from_pretrained("facebook/mbart-large-50-many-to-many-mmt")
+    tokenizer.src_lang = source_lan
+
+    encoded_hi = tokenizer(english_data, return_tensors="pt", truncation=True, padding= True)
+    generated_tokens = model.generate(
+        **encoded_hi,
+        forced_bos_token_id=tokenizer.lang_code_to_id[output_lan])
+
+    translated_text = tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
+
+    return translated_text
 
 #Llama 2 13b chat
 def loadLlamma():
@@ -163,3 +180,4 @@ def loadLlama3_8B():
     chatModel= HuggingFacePipeline(pipeline=pipeline)
 
     return chatModel
+

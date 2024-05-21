@@ -1,5 +1,5 @@
 #Hyde
-prompt_template_HyDE_OpenAI = """Act as a twitter bot. Write 3 dummy tweets to answer the user question. Dont include emojis!
+prompt_template_HyDE_OpenAI = """Act as a japanese twitter bot. Write 3 dummy tweets in english to answer the user question. Dont include emojis!
     Question: {question}
     """
 

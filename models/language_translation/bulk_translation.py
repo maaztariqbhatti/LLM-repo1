@@ -80,5 +80,5 @@ print(translated_text[0:9])
 #     if index > 8:
 #         break
 
-with open('fsd_1555_700_717.pkl', 'wb') as f:
-    pickle.dump(translated_text, f)
+# with open('fsd_1555_700_717.pkl', 'wb') as f:
+#     pickle.dump(translated_text, f)

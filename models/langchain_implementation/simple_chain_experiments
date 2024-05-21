@@ -42,6 +42,8 @@ import wandb
 import pickle
 import prompts
 import groundTruths
+from langchain.embeddings import SentenceTransformerEmbeddings
+from FlagEmbedding import FlagReranker
 
 dotenv.load_dotenv()
 
@@ -54,23 +56,24 @@ chatModelAI = ChatOpenAI(temperature=0)
 # chatModel_llama13b = llmModels.loadLlamma()
 
 # # # Mistral 7B chat
-chatModel_mistral7b = llmModels.loadMistral7b()
+# chatModel_mistral7b = llmModels.loadMistral7b()
 
 # #70B
 # chatModel_llama70b = llmModels.loadLlama2_70B()
 
 ## Llama 3 8B
-# chatModel_llama3_8B = llmModels.loadLlama3_8B()
+chatModel_llama3_8B = llmModels.loadLlama3_8B() 
 
 ##FSD_1777
-dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/FSD1777_Oct23.json"
-dateFrom = "2023-10-19T09:00:00+00:00" #2023-10-19T18:58:41Z for 200 tweets
-dateTo = "2023-10-19T18:00:00+00:00"
+# dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/FSD1777_Oct23.json"
+# dateFrom = "2023-10-19T09:00:00+00:00" #2023-10-19T18:58:41Z for 200 tweets
+# dateTo = "2023-10-19T18:00:00+00:00"
 
-##FSD_1555
-# dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/fsd_1555_0601_21_59_22TO23_59_59.pkl"
-# dateFrom = "2023-06-01 22:59:45+00:00" 
-# dateTo = "2023-06-01 23:59:59+00:00" #200 tweets labelled
+#FSD_1555
+# dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/fsd_1555_0601_06_15.pkl"
+dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/fsd_1555_Japan_06_15.pkl"
+dateFrom = "2023-06-01 06:00:00+00:00" 
+dateTo = "2023-06-01 13:00:00+00:00" 
 
 class CustomRetriever(VectorStoreRetriever):
     """Implements re ranking of retriever output using cross encoder"""
@@ -79,6 +82,7 @@ class CustomRetriever(VectorStoreRetriever):
     search_kwargs: dict = Field(default_factory=dict)
 
     def get_relevant_documents(self, query: str) -> List[Document]:
+
         docs = self.vectorstore.get_relevant_documents(query=query)
 
         # Cross encoder re ranking 
@@ -109,6 +113,68 @@ class CustomRetriever(VectorStoreRetriever):
             doc.metadata.pop("cross-encoder_score")
         return reordered_docs
 
+class Custom_ja_Retriever(VectorStoreRetriever):
+    """Implements re ranking of retriever output using cross encoder"""
+    vectorstore: VectorStoreRetriever
+    search_type: str = "similarity"
+    search_kwargs: dict = Field(default_factory=dict)
+
+    def get_relevant_documents(self, query: str) -> List[Document]:
+        """Extract relevant records using japanese embedding model"""
+
+        #Translate query to japanese 
+        # query_ja = llmModels.bulk_translation(query, source_lan = "en_XX", output_lan= "ja_XX")
+        # query = query_ja[0]
+
+        #Retrieve japanese records
+        docs = self.vectorstore.get_relevant_documents(query=query)
+
+        # Cross encoder re ranking ----
+        cross_encoder = FlagReranker('BAAI/bge-reranker-v2-m3', use_fp16=True)
+
+        pairs = []
+        for doc in docs:
+            pairs.append([query, doc.page_content])
+        scores = cross_encoder.compute_score(pairs)
+
+        i = 0
+        #Add scores to document
+        for doc in docs:
+            doc.metadata["cross-encoder_score"] = scores[i]
+            i = i+1
+        #Sort documents according to score
+        sorted_docs = sorted(docs, key=lambda doc: doc.metadata.get('cross-encoder_score'), reverse=True)
+
+        #Remove 20 worst performing docs from the list 
+        sorted_docs = sorted_docs[:60]
+
+        # #Re order according to long text re-order (Important context in start and end)
+        # reordering = LongContextReorder()
+        # reordered_docs = reordering.transform_documents(sorted_docs)
+
+        #Remove cross encoder score so re ordered context is back to its orignal form
+        for doc in sorted_docs:
+            doc.metadata.pop("cross-encoder_score")
+
+        #Change updated docs back to docs
+        docs = sorted_docs
+
+        ##Extract japanese tweet texts -----------
+        tweets_JA = []
+        for doc in docs:
+            tweets_JA.append(doc.page_content)
+
+        #Translate text feild to english
+        docs_en = llmModels.bulk_translation(tweets_JA)
+
+        #Chnage text to english 
+        ind = 0
+        for doc in docs:
+            doc.page_content = docs_en[ind]
+            ind = ind+1
+
+        return docs
+
 """Load relevant fields of flood tags api json response"""
 def json_dataloader(dataPath = dataPath, dateFrom = dateFrom, dateTo = dateTo):
     # Load json and extract relevant records in pandas df
@@ -137,7 +203,8 @@ def json_dataloader(dataPath = dataPath, dateFrom = dateFrom, dateTo = dateTo):
     return df
 
 def bgeEmbeddings():
-    model_name = "BAAI/bge-large-en-v1.5"
+    # model_name = "BAAI/bge-large-en-v1.5"
+    model_name = "BAAI/bge-m3"
     model_kwargs = {'device': 'cuda'}
     encode_kwargs = {'normalize_embeddings': True} # set True to compute cosine similarity
     model = HuggingFaceBgeEmbeddings(
@@ -191,15 +258,24 @@ def multiGen_hydeEmbedder(embeddingsModel):
     )
     return embeddings
 
-def data_embedding(data : list, eModel = "bge-large-en-v1.5", rType = "Query", metric = "L2"):
+def japaneseEmbedding_glucose():
+    model = SentenceTransformerEmbeddings(model_name="pkshatech/GLuCoSE-base-ja")
+    return model
+
+def data_embedding(data : list, eModel = "bge-large-en-v1.5", rType = "Query", metric = "L2", lang = "en"):
     """Vectorize the data using OpenAI embeddings and store in Chroma db"""
-    if eModel != "bge-large-en-v1.5":
-        embeddings = OpenAIEmbeddings()
-    else:
+    if lang == "en":
+        if eModel != "bge-large-en-v1.5":
+            embeddings = OpenAIEmbeddings()
+        else:
+            embeddings = bgeEmbeddings()
+        
+        if (rType == "Hyde"):
+            embeddings = hydeEmbedder(embeddings)
+
+    if lang == "ja":
         embeddings = bgeEmbeddings()
-    
-    if (rType == "Hyde"):
-        embeddings = hydeEmbedder(embeddings)
+
 
     documents = []
     loader = DataFrameLoader(data, page_content_column="text")
@@ -222,13 +298,13 @@ def data_embedding(data : list, eModel = "bge-large-en-v1.5", rType = "Query", m
     return db
 
 """For running a single query"""
-def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query", rerank = False,k = 30):
+def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Hyde", rerank = False,k = 50, lang = "en"):
     
     #  LLM initialisation
     model = chatModel_llama3_8B
 
     # Load the data from source
-    data = json_dataloader()
+    data = dataframe_dataloader()
 
     # ### remove brechin
     # import spacy
@@ -254,13 +330,21 @@ def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query"
     # data = dataframe_dataloader()
 
     # Convert to vector store
-    vectorstore = data_embedding(data, eModel= eModel, rType= rType)
+    vectorstore = data_embedding(data, eModel= eModel, rType= rType, lang = lang)
+    
+    # #Convert japanese tweets to english after retrieval
+    # if lang == "ja":
+    #     retriever = Custom_ja_Retriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k}))
 
+    if lang == "en":
         # Get retriever
-    if rerank == True:
-        retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k}))
-    else:
-        retriever = vectorstore.as_retriever(search_kwargs={'k': k})
+        if rerank == True:
+            retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k}))
+        else:
+            retriever = vectorstore.as_retriever(search_kwargs={'k': k})
+    
+    if lang == "ja":
+        retriever = Custom_ja_Retriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k}))
 
 
     default_prompt = PromptTemplate(template = prompts.prompt_template_llama3_loc, input_variables = ['question', 'context'])
@@ -283,7 +367,10 @@ def train_sweeps(config = None):
         config = wandb.config
          
         # # Load the data from source
-        data = json_dataloader()
+        # data = json_dataloader()
+
+        # Load the data from source - FSD 1555
+        data = dataframe_dataloader()
 
         # Loading pandas dataframe from picke file
         # data = dataframe_dataloader()
@@ -338,7 +425,7 @@ def train_sweeps(config = None):
         #"Which locations are receiving evacuation orders?"
 
         #FSD_XXXX
-        ground_truths = [groundTruths.gt_FSD1777_peak_evac]
+        ground_truths = [groundTruths.gt_FSD1555_fw]
         
 
         answers = []
@@ -390,7 +477,7 @@ def run_sweep():
         'values': [30, 40 ,50]
         },
     'LLM': {
-        'values': ["Mistral-7B-Instruct-v0.2"] #"Llama-2-13b-chat-hf"   # "Llama-2-70b-chat-hf" # "Llama-3-8b-chat-hf" #"Mistral-7B-Instruct-v0.2"
+        'values': ["Llama-3-8b-chat-hf"] #"Llama-2-13b-chat-hf"   # "Llama-2-70b-chat-hf" # "Llama-3-8b-chat-hf" #"Mistral-7B-Instruct-v0.2"
         },
     'Cross_Encoder_rerank': {
         'values' : ["No"]
@@ -409,16 +496,17 @@ def run_sweep():
     sweep_config['parameters'] = parameters_dict    
 
     #Initialise sweep
-    sweep_id = wandb.sweep(sweep_config, project="FSD_1777_Human_Eval_FW_P2") #FW_1777_AER_LongContext_LLMs #FFSD_1777_Human_Eval
+    sweep_id = wandb.sweep(sweep_config, project="FSD_1555_Human_Eval_FW_P2") #FW_1777_AER_LongContext_LLMs #FFSD_1777_Human_Eval
 
     wandb.agent(sweep_id, train_sweeps)
 
 if __name__ == "__main__":
 
-    # prompt = """Which locations have received evacuation orders?"""
-    # predictions_response(prompt)
+    # prompt = """どの場所が洪水警告を受けていますか?"""
+    prompt = "Where areas are likely to receive flood warnings due to heavy rain?"
+    predictions_response(prompt, lang = 'ja', k = 0)
 
-    run_sweep()
+    # run_sweep()
 
                                                     
 

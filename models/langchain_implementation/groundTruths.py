@@ -1,5 +1,5 @@
-# FSD_1555
-gt_FSD1555_fw = ["Toyohashi City,Hirakata,Benyagawa,Osaka,Nagoya,Takada City,Yamato,Shizuoka Prefecture,Moriyama city,Fukuchi-yama,Nara Prefecture,Ito City,Iwata City,Kakegawa City,Baguio City,Shimoda City,Higashi Izu City,Kawazu City,Minami Izu City,Matsuzaki City,Nishi Izu City,Mori City,Hamamatsu City,Lake Nishi City,Umeda river,Azoto-cho,Kyoto Prefecture,Ikoma city,Toyokawa City,Aichi Prefecture,Wakayama City,Sakade city,Hyogo Prefecture,Kashiba City,Katsu City,Ando Town,Kinki,Fukuda City,Nagano Prefecture"]
+#FSD_1555
+gt_FSD1555_fw = ["Yonoka and Ninami,Hirakata,Benyagawa,Kyoto Shiga,Saitama,Oita,Uwajima,Kanagawa and  Miura Peninsula,Shizuoka,Yamanashi Prefecture,Tochigi Prefecture,Ibaraki Prefecture,Fukui Prefecture,Kanto Koshin,Gunma Prefecture,Okinawa,China and Sichuan,Toyama Prefecture,Mie Aichi,Nakaechi and Uechi,Ehime Prefecture,Gifu Prefecture,Wakayama Prefecture,Southern Kyushu and Amami Prefecture,Osumi and Senegashima and Yakushima regions,Hyogo Prefecture,Nara Prefecture,Nagano Prefecture,Shiga Prefecture,Miyazaki Prefecture,Shikoku Prefecture,Kinki Prefecture,Southwest Islands to Eastern Japan"]
 
 
 #FSD_1777

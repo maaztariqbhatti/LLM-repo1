@@ -26,12 +26,12 @@ tokenizer = MBart50TokenizerFast.from_pretrained("facebook/mbart-large-50-many-t
 # # => "The Secretary-General of the United Nations says there is no military solution in Syria."
 
 #Japanese to english
-article_ja = "明日の関東地方は 大雨突風に要注意！ 線状降水帯による河川の氾濫 および用水路の増水に注意！！"
-tokenizer.src_lang = "ja_XX"
+article_ja = "Which locations are receiving flood warnings?"
+tokenizer.src_lang = "en_XX"
 encoded_hi = tokenizer(article_ja, return_tensors="pt")
 generated_tokens = model.generate(
     **encoded_hi,
-    forced_bos_token_id=tokenizer.lang_code_to_id["en_XX"]
+    forced_bos_token_id=tokenizer.lang_code_to_id["ja_XX"]
 ).to("cuda")
 
 # your code here    

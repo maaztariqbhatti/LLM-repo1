@@ -19,8 +19,8 @@ tokenizer = AutoTokenizer.from_pretrained(model_id)
 messages = [
     # {"role": "system", "content": "Act as a location extractor and extract all relevant locations with respect to the user question."},
 
-    {"role": "user", "content": """Does the following tweet specifically mention evacuation orders:
-     More than 400 properties in Brechin in Angus – and in the villages of Tannadice and Finavon – have been told to leave their homes with flood defences expected to be breached within 24 hours.
+    {"role": "user", "content": """According to the following context which locations are receiving flood warnings:
+     【近畿地方 気象情報 2023年06月01日 15:32】 近畿地方では、1日夜のはじめ頃から3日午前中にかけて、局地的に雷を伴った激しい雨や非常に激しい雨が降る見込みです。2日昼前から夜遅くにかけて、土砂災害や低い土地の浸水、河川の増水や氾濫に警戒してください。
     """},
 ]
 

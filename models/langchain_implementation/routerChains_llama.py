@@ -46,30 +46,67 @@ dataPath = "FSD1777_Oct23.json"
 
 
 #Llama 2
-@st.cache_resource
-def loadLlamma():
-    #Enter your local directory wehre the model is stored
-    save_path = "/home/mbhatti/mnt/d/Llama-2-13b-chat-hf"
+# @st.cache_resource
+# def loadLlamma():
+#     #Enter your local directory wehre the model is stored
+#     save_path = "/home/mbhatti/mnt/d/Llama-2-13b-chat-hf"
 
-    #Empty cuda cache
-    torch.cuda.empty_cache()
+#     #Empty cuda cache
+#     torch.cuda.empty_cache()
+#     torch.backends.cuda.enable_mem_efficient_sdp(False)
+#     torch.backends.cuda.enable_flash_sdp(False)
+
+
+#     #Call the model and tokenizer from local storage
+#     local_model = AutoModelForCausalLM.from_pretrained(save_path, return_dict=True, trust_remote_code=True, device_map="auto",torch_dtype=torch.bfloat16).to("cuda")
+#     local_tokenizer = AutoTokenizer.from_pretrained(save_path)
+
+#     pipeline = transformers.pipeline(
+#             task = "text-generation",
+#             model = local_model,
+#             return_full_text = True,
+#             tokenizer = local_tokenizer,
+#             temperature = 0.1,
+#             max_new_tokens = 512,
+#             repetition_penalty=1.1
+#         )
+
+#     chatModel= HuggingFacePipeline(pipeline=pipeline)
+
+#     return chatModel
+
+@st.cache_resource
+#Llama3-8B-Chat
+def loadLlamma():
+
+    model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
     torch.backends.cuda.enable_mem_efficient_sdp(False)
     torch.backends.cuda.enable_flash_sdp(False)
 
+    model = AutoModelForCausalLM.from_pretrained(
+        model_id,
+        torch_dtype=torch.bfloat16,
+        device_map="auto").to("cuda")
 
-    #Call the model and tokenizer from local storage
-    local_model = AutoModelForCausalLM.from_pretrained(save_path, return_dict=True, trust_remote_code=True, device_map="auto",torch_dtype=torch.bfloat16).to("cuda")
-    local_tokenizer = AutoTokenizer.from_pretrained(save_path)
+    model.generation_config.temperature=None
+    model.generation_config.top_p=None
+
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+
+    terminators = [
+    tokenizer.eos_token_id,
+    tokenizer.convert_tokens_to_ids("<|eot_id|>")
+    ]
 
     pipeline = transformers.pipeline(
-            task = "text-generation",
-            model = local_model,
-            return_full_text = True,
-            tokenizer = local_tokenizer,
-            temperature = 0.1,
-            max_new_tokens = 512,
-            repetition_penalty=1.1
-        )
+    model=model, 
+    tokenizer=tokenizer,
+    eos_token_id=terminators,
+    return_full_text=True,  # langchain expects the full text
+    task='text-generation',
+    do_sample=False, # 'randomness' of outputs, 0.0 is the min and 1.0 the max
+    max_new_tokens=512  # mex number of tokens to generate in the output
+    )
 
     chatModel= HuggingFacePipeline(pipeline=pipeline)
 
@@ -157,21 +194,20 @@ class InputAdapterChain(Chain):
 
 
 class PromptFactory():
-    location_template = prompts.prompt_template_llama_loc
+    location_template = prompts.prompt_template_llama3_loc
 
     numbers_template = prompts.prompt_template_human
 
-    geocode_template = prompts.prompt_template_geocode
 
     prompt_infos = [
+        # {
+        #     'name': 'amount of rainfall detector',
+        #     'description': 'Good for summing up the number of casualties such as deaths and injuries within a context',
+        #     'prompt_template': numbers_template
+        # },
         {
-            'name': 'human_casualties_detector',
-            'description': 'Good for summing up the number of casualties such as deaths and injuries within a context',
-            'prompt_template': numbers_template
-        },
-        {
-            'name': 'flood_location_extractor',
-            'description': 'Good for extracting flooded locations from a context',
+            'name': 'location_extractor',
+            'description': 'Good for extracting locations entities from a context',
             'prompt_template': location_template
         }
     ]
@@ -330,7 +366,7 @@ class LangChain_analysis:
             retriever = vectorstore.as_retriever(search_kwargs={'k': k})
 
         #  LLM initialisation
-        if llm_model == 'Llama13bChat':
+        if llm_model == 'Llama3-8bChat':
             model = chatModel
         else:
             model = chatMistral
@@ -356,7 +392,7 @@ class LangChain_analysis:
             destination_chains[name] = adapted_chain
 
         #Default chain and prompt
-        default_prompt_template = prompts.prompt_template_default
+        default_prompt_template = prompts.prompt_template_llama3_default
         default_prompt = PromptTemplate(template = default_prompt_template, input_variables = ['question', 'context'])
         default_chain = RetrievalQA.from_chain_type(llm = model,
                                 chain_type='stuff',
@@ -421,7 +457,7 @@ if __name__ == "__main__":
         st.write("Select LLM")
         llm_model = st.selectbox(
         "LLM for inference",
-        ("Llama13bChat", "Mistral7bInstruct"),
+        ("Llama3-8bChat", "Mistral7bInstruct"),
         index=None, 
         placeholder="Select LLM...",
         )
@@ -475,14 +511,14 @@ if __name__ == "__main__":
             st.markdown(message["content"])
         
     if floodLoc == True:
-        hard_prompt = "Which locations received a flood warning?"
+        hard_prompt = "Which locations have received flood warnings?"
         st_input = hard_prompt
     if roadsClosure == True:
         st_input = "Is there mention of closure of roads? If yes which roads/highways are shut down due to flooding?"
     if evacuation == True:
-        st_input = "Which locations have evacuation orders?"
+        st_input = "Which locations have received evacuation orders?"
     if casualties == True:
-        st_input = "Reported deaths due to flood?"
+        st_input = "Have any deaths or injuries been reported?"
 
     # React to user input
     if prompt := st_input:
