@@ -1,0 +1,232 @@
+2024-05-25 11:19:03,130 INFO    StreamThr :841954 [internal.py:wandb_internal():86] W&B internal server running at pid: 841954, started at: 2024-05-25 11:19:03.128501
+2024-05-25 11:19:03,139 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status
+2024-05-25 11:19:03,149 INFO    WriterThread:841954 [datastore.py:open_for_write():87] open: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/run-z4mgspzx.wandb
+2024-05-25 11:19:03,151 DEBUG   SenderThread:841954 [sender.py:send():379] send: header
+2024-05-25 11:19:03,160 DEBUG   SenderThread:841954 [sender.py:send():379] send: run
+2024-05-25 11:19:03,586 INFO    SenderThread:841954 [dir_watcher.py:__init__():211] watching files in: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files
+2024-05-25 11:19:03,587 INFO    SenderThread:841954 [sender.py:_start_run_threads():1124] run started: z4mgspzx with start time 1716625143.125386
+2024-05-25 11:19:03,601 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: check_version
+2024-05-25 11:19:03,601 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: check_version
+2024-05-25 11:19:03,673 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: run_start
+2024-05-25 11:19:03,691 DEBUG   HandlerThread:841954 [system_info.py:__init__():26] System info init
+2024-05-25 11:19:03,691 DEBUG   HandlerThread:841954 [system_info.py:__init__():41] System info init done
+2024-05-25 11:19:03,691 INFO    HandlerThread:841954 [system_monitor.py:start():194] Starting system monitor
+2024-05-25 11:19:03,692 INFO    HandlerThread:841954 [system_monitor.py:probe():214] Collecting system info
+2024-05-25 11:19:03,693 INFO    SystemMonitor:841954 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2024-05-25 11:19:03,696 INFO    SystemMonitor:841954 [interfaces.py:start():190] Started cpu monitoring
+2024-05-25 11:19:03,699 INFO    SystemMonitor:841954 [interfaces.py:start():190] Started disk monitoring
+2024-05-25 11:19:03,705 INFO    SystemMonitor:841954 [interfaces.py:start():190] Started gpu monitoring
+2024-05-25 11:19:03,709 INFO    SystemMonitor:841954 [interfaces.py:start():190] Started memory monitoring
+2024-05-25 11:19:03,712 INFO    SystemMonitor:841954 [interfaces.py:start():190] Started network monitoring
+2024-05-25 11:19:03,760 DEBUG   HandlerThread:841954 [system_info.py:probe():150] Probing system
+2024-05-25 11:19:03,762 DEBUG   HandlerThread:841954 [system_info.py:_probe_git():135] Probing git
+2024-05-25 11:19:03,772 DEBUG   HandlerThread:841954 [system_info.py:_probe_git():143] Probing git done
+2024-05-25 11:19:03,772 DEBUG   HandlerThread:841954 [system_info.py:probe():198] Probing system done
+2024-05-25 11:19:03,772 DEBUG   HandlerThread:841954 [system_monitor.py:probe():223] {'os': 'Linux-5.11.0-38-generic-x86_64-with-glibc2.31', 'python': '3.11.7', 'heartbeatAt': '2024-05-25T08:19:03.760593', 'startedAt': '2024-05-25T08:19:03.102990', 'docker': None, 'cuda': None, 'args': (), 'state': 'running', 'program': '/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/simple_chain_experiments', 'codePathLocal': 'models/langchain_implementation/simple_chain_experiments', 'codePath': 'models/langchain_implementation/simple_chain_experiments', 'git': {'remote': 'https://github.com/maaztariqbhatti/LLM-repo1.git', 'commit': '584bd1b236ea0fb7e62a5192a7f8a277bd9137f6'}, 'email': 'maaz.bhatti@iceye.fi', 'root': '/home/mbhatti/mnt/d/LLM-repo1', 'host': 'MLServer01', 'username': 'mbhatti', 'executable': '/home/mbhatti/miniconda3/envs/llama/bin/python', 'cpu_count': 20, 'cpu_count_logical': 40, 'cpu_freq': {'current': 1210.5186999999999, 'min': 1000.0, 'max': 3400.0}, 'cpu_freq_per_core': [{'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1753.866, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 3400.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1100.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 3400.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1300.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 1000.0, 'min': 1000.0, 'max': 3400.0}, {'current': 2999.999, 'min': 1000.0, 'max': 3400.0}], 'disk': {'/': {'total': 8865.72547531128, 'used': 7187.392276763916}}, 'gpu': 'Quadro RTX 8000', 'gpu_count': 1, 'gpu_devices': [{'name': 'Quadro RTX 8000', 'memory_total': 51539607552}], 'memory': {'total': 92.9074935913086}}
+2024-05-25 11:19:03,772 INFO    HandlerThread:841954 [system_monitor.py:probe():224] Finished collecting system info
+2024-05-25 11:19:03,772 INFO    HandlerThread:841954 [system_monitor.py:probe():227] Publishing system info
+2024-05-25 11:19:03,772 DEBUG   HandlerThread:841954 [system_info.py:_save_conda():207] Saving list of conda packages installed into the current environment
+2024-05-25 11:19:04,488 DEBUG   HandlerThread:841954 [system_info.py:_save_conda():222] Saving conda packages done
+2024-05-25 11:19:04,496 INFO    HandlerThread:841954 [system_monitor.py:probe():229] Finished publishing system info
+2024-05-25 11:19:04,501 DEBUG   SenderThread:841954 [sender.py:send():379] send: files
+2024-05-25 11:19:04,501 INFO    SenderThread:841954 [sender.py:_save_file():1390] saving file wandb-metadata.json with policy now
+2024-05-25 11:19:04,597 INFO    Thread-17 :841954 [dir_watcher.py:_on_file_created():271] file/dir created: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/wandb-metadata.json
+2024-05-25 11:19:04,597 INFO    Thread-17 :841954 [dir_watcher.py:_on_file_created():271] file/dir created: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/conda-environment.yaml
+2024-05-25 11:19:05,152 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: python_packages
+2024-05-25 11:19:05,152 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: python_packages
+2024-05-25 11:19:05,155 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-25 11:19:05,156 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: stop_status
+2024-05-25 11:19:05,161 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-25 11:19:05,216 INFO    wandb-upload_0:841954 [upload_job.py:push():131] Uploaded file /tmp/tmpmp3c1endwandb/xaxo3926-wandb-metadata.json
+2024-05-25 11:19:05,345 DEBUG   SenderThread:841954 [sender.py:send():379] send: telemetry
+2024-05-25 11:19:05,589 INFO    Thread-17 :841954 [dir_watcher.py:_on_file_created():271] file/dir created: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/requirements.txt
+2024-05-25 11:19:08,347 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:19:13,348 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:19:18,349 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:19:20,154 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-25 11:19:20,155 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: stop_status
+2024-05-25 11:19:20,167 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-25 11:19:24,343 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:19:29,344 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:19:34,349 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:19:34,604 INFO    Thread-17 :841954 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/config.yaml
+2024-05-25 11:19:35,155 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-25 11:19:35,156 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: stop_status
+2024-05-25 11:19:35,166 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-25 11:19:40,369 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:19:45,370 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:19:50,155 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-25 11:19:50,156 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: stop_status
+2024-05-25 11:19:50,197 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-25 11:19:50,424 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:19:55,425 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:20:00,426 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:20:03,713 DEBUG   SystemMonitor:841954 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2024-05-25 11:20:03,719 DEBUG   SenderThread:841954 [sender.py:send():379] send: stats
+2024-05-25 11:20:05,155 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-25 11:20:05,156 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: stop_status
+2024-05-25 11:20:05,164 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-25 11:20:06,399 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:20:11,400 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:20:16,401 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:20:20,155 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-25 11:20:20,156 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: stop_status
+2024-05-25 11:20:20,167 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-25 11:20:21,420 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:20:26,421 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:20:31,422 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:20:33,724 DEBUG   SenderThread:841954 [sender.py:send():379] send: stats
+2024-05-25 11:20:35,156 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-25 11:20:35,157 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: stop_status
+2024-05-25 11:20:35,197 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-25 11:20:37,373 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:20:42,374 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:20:47,375 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:20:50,158 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-25 11:20:50,159 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: stop_status
+2024-05-25 11:20:50,165 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-25 11:20:52,347 DEBUG   SenderThread:841954 [sender.py:send():379] send: telemetry
+2024-05-25 11:20:53,348 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:20:58,349 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:20:58,649 INFO    Thread-17 :841954 [dir_watcher.py:_on_file_created():271] file/dir created: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/output.log
+2024-05-25 11:21:00,650 INFO    Thread-17 :841954 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/output.log
+2024-05-25 11:21:03,728 DEBUG   SenderThread:841954 [sender.py:send():379] send: stats
+2024-05-25 11:21:03,730 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:21:04,652 INFO    Thread-17 :841954 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/output.log
+2024-05-25 11:21:05,158 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: stop_status
+2024-05-25 11:21:05,159 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: stop_status
+2024-05-25 11:21:05,169 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-25 11:21:09,398 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:21:09,655 INFO    Thread-17 :841954 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/config.yaml
+2024-05-25 11:21:11,489 DEBUG   SenderThread:841954 [sender.py:send():379] send: telemetry
+2024-05-25 11:21:11,489 DEBUG   SenderThread:841954 [sender.py:send():379] send: exit
+2024-05-25 11:21:11,489 INFO    SenderThread:841954 [sender.py:send_exit():586] handling exit code: 1
+2024-05-25 11:21:11,490 INFO    SenderThread:841954 [sender.py:send_exit():588] handling runtime: 127
+2024-05-25 11:21:11,499 INFO    SenderThread:841954 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-25 11:21:11,500 INFO    SenderThread:841954 [sender.py:send_exit():594] send defer
+2024-05-25 11:21:11,501 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: defer
+2024-05-25 11:21:11,501 INFO    HandlerThread:841954 [handler.py:handle_request_defer():172] handle defer: 0
+2024-05-25 11:21:11,502 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: defer
+2024-05-25 11:21:11,502 INFO    SenderThread:841954 [sender.py:send_request_defer():610] handle sender defer: 0
+2024-05-25 11:21:11,502 INFO    SenderThread:841954 [sender.py:transition_state():614] send defer: 1
+2024-05-25 11:21:11,502 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: defer
+2024-05-25 11:21:11,503 INFO    HandlerThread:841954 [handler.py:handle_request_defer():172] handle defer: 1
+2024-05-25 11:21:11,503 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: defer
+2024-05-25 11:21:11,503 INFO    SenderThread:841954 [sender.py:send_request_defer():610] handle sender defer: 1
+2024-05-25 11:21:11,504 INFO    SenderThread:841954 [sender.py:transition_state():614] send defer: 2
+2024-05-25 11:21:11,504 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: defer
+2024-05-25 11:21:11,504 INFO    HandlerThread:841954 [handler.py:handle_request_defer():172] handle defer: 2
+2024-05-25 11:21:11,504 INFO    HandlerThread:841954 [system_monitor.py:finish():203] Stopping system monitor
+2024-05-25 11:21:11,505 DEBUG   SystemMonitor:841954 [system_monitor.py:_start():179] Finished system metrics aggregation loop
+2024-05-25 11:21:11,507 INFO    HandlerThread:841954 [interfaces.py:finish():202] Joined cpu monitor
+2024-05-25 11:21:11,507 DEBUG   SystemMonitor:841954 [system_monitor.py:_start():183] Publishing last batch of metrics
+2024-05-25 11:21:11,508 INFO    HandlerThread:841954 [interfaces.py:finish():202] Joined disk monitor
+2024-05-25 11:21:11,655 INFO    HandlerThread:841954 [interfaces.py:finish():202] Joined gpu monitor
+2024-05-25 11:21:11,656 INFO    HandlerThread:841954 [interfaces.py:finish():202] Joined memory monitor
+2024-05-25 11:21:11,657 INFO    HandlerThread:841954 [interfaces.py:finish():202] Joined network monitor
+2024-05-25 11:21:11,659 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: defer
+2024-05-25 11:21:11,659 INFO    SenderThread:841954 [sender.py:send_request_defer():610] handle sender defer: 2
+2024-05-25 11:21:11,660 INFO    SenderThread:841954 [sender.py:transition_state():614] send defer: 3
+2024-05-25 11:21:11,660 DEBUG   SenderThread:841954 [sender.py:send():379] send: stats
+2024-05-25 11:21:11,661 INFO    Thread-17 :841954 [dir_watcher.py:_on_file_created():271] file/dir created: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/wandb-summary.json
+2024-05-25 11:21:11,661 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: defer
+2024-05-25 11:21:11,664 INFO    HandlerThread:841954 [handler.py:handle_request_defer():172] handle defer: 3
+2024-05-25 11:21:11,664 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: defer
+2024-05-25 11:21:11,665 INFO    SenderThread:841954 [sender.py:send_request_defer():610] handle sender defer: 3
+2024-05-25 11:21:11,665 INFO    SenderThread:841954 [sender.py:transition_state():614] send defer: 4
+2024-05-25 11:21:11,665 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: defer
+2024-05-25 11:21:11,666 INFO    HandlerThread:841954 [handler.py:handle_request_defer():172] handle defer: 4
+2024-05-25 11:21:11,666 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: defer
+2024-05-25 11:21:11,666 INFO    SenderThread:841954 [sender.py:send_request_defer():610] handle sender defer: 4
+2024-05-25 11:21:11,666 INFO    SenderThread:841954 [sender.py:transition_state():614] send defer: 5
+2024-05-25 11:21:11,667 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: defer
+2024-05-25 11:21:11,667 INFO    HandlerThread:841954 [handler.py:handle_request_defer():172] handle defer: 5
+2024-05-25 11:21:11,668 DEBUG   SenderThread:841954 [sender.py:send():379] send: summary
+2024-05-25 11:21:11,668 INFO    SenderThread:841954 [sender.py:_save_file():1390] saving file wandb-summary.json with policy end
+2024-05-25 11:21:11,669 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: defer
+2024-05-25 11:21:11,669 INFO    SenderThread:841954 [sender.py:send_request_defer():610] handle sender defer: 5
+2024-05-25 11:21:11,669 INFO    SenderThread:841954 [sender.py:transition_state():614] send defer: 6
+2024-05-25 11:21:11,669 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: defer
+2024-05-25 11:21:11,670 INFO    HandlerThread:841954 [handler.py:handle_request_defer():172] handle defer: 6
+2024-05-25 11:21:11,670 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: defer
+2024-05-25 11:21:11,670 INFO    SenderThread:841954 [sender.py:send_request_defer():610] handle sender defer: 6
+2024-05-25 11:21:11,675 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: status_report
+2024-05-25 11:21:11,904 INFO    SenderThread:841954 [sender.py:transition_state():614] send defer: 7
+2024-05-25 11:21:11,905 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: defer
+2024-05-25 11:21:11,905 INFO    HandlerThread:841954 [handler.py:handle_request_defer():172] handle defer: 7
+2024-05-25 11:21:11,905 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: defer
+2024-05-25 11:21:11,906 INFO    SenderThread:841954 [sender.py:send_request_defer():610] handle sender defer: 7
+2024-05-25 11:21:12,442 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: poll_exit
+2024-05-25 11:21:12,661 INFO    Thread-17 :841954 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/config.yaml
+2024-05-25 11:21:12,662 INFO    Thread-17 :841954 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/wandb-summary.json
+2024-05-25 11:21:13,460 INFO    SenderThread:841954 [sender.py:transition_state():614] send defer: 8
+2024-05-25 11:21:13,460 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: poll_exit
+2024-05-25 11:21:13,460 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: defer
+2024-05-25 11:21:13,461 INFO    HandlerThread:841954 [handler.py:handle_request_defer():172] handle defer: 8
+2024-05-25 11:21:13,462 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: defer
+2024-05-25 11:21:13,462 INFO    SenderThread:841954 [sender.py:send_request_defer():610] handle sender defer: 8
+2024-05-25 11:21:13,462 INFO    SenderThread:841954 [sender.py:transition_state():614] send defer: 9
+2024-05-25 11:21:13,462 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: defer
+2024-05-25 11:21:13,462 INFO    HandlerThread:841954 [handler.py:handle_request_defer():172] handle defer: 9
+2024-05-25 11:21:13,463 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: defer
+2024-05-25 11:21:13,463 INFO    SenderThread:841954 [sender.py:send_request_defer():610] handle sender defer: 9
+2024-05-25 11:21:13,463 INFO    SenderThread:841954 [dir_watcher.py:finish():358] shutting down directory watcher
+2024-05-25 11:21:13,662 INFO    Thread-17 :841954 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/output.log
+2024-05-25 11:21:13,664 INFO    SenderThread:841954 [dir_watcher.py:finish():388] scan: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files
+2024-05-25 11:21:13,664 INFO    SenderThread:841954 [dir_watcher.py:finish():402] scan save: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/config.yaml config.yaml
+2024-05-25 11:21:13,665 INFO    SenderThread:841954 [dir_watcher.py:finish():402] scan save: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/wandb-summary.json wandb-summary.json
+2024-05-25 11:21:13,666 INFO    SenderThread:841954 [dir_watcher.py:finish():402] scan save: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/requirements.txt requirements.txt
+2024-05-25 11:21:13,666 INFO    SenderThread:841954 [dir_watcher.py:finish():402] scan save: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/output.log output.log
+2024-05-25 11:21:13,672 INFO    SenderThread:841954 [dir_watcher.py:finish():402] scan save: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/conda-environment.yaml conda-environment.yaml
+2024-05-25 11:21:13,677 INFO    SenderThread:841954 [dir_watcher.py:finish():402] scan save: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/wandb-metadata.json wandb-metadata.json
+2024-05-25 11:21:13,677 INFO    SenderThread:841954 [sender.py:transition_state():614] send defer: 10
+2024-05-25 11:21:13,679 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: defer
+2024-05-25 11:21:13,680 INFO    HandlerThread:841954 [handler.py:handle_request_defer():172] handle defer: 10
+2024-05-25 11:21:13,692 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: defer
+2024-05-25 11:21:13,693 INFO    SenderThread:841954 [sender.py:send_request_defer():610] handle sender defer: 10
+2024-05-25 11:21:13,693 INFO    SenderThread:841954 [file_pusher.py:finish():172] shutting down file pusher
+2024-05-25 11:21:14,109 INFO    wandb-upload_0:841954 [upload_job.py:push():131] Uploaded file /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/config.yaml
+2024-05-25 11:21:14,186 INFO    wandb-upload_1:841954 [upload_job.py:push():131] Uploaded file /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/wandb-summary.json
+2024-05-25 11:21:14,205 INFO    wandb-upload_3:841954 [upload_job.py:push():131] Uploaded file /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/output.log
+2024-05-25 11:21:14,208 INFO    wandb-upload_4:841954 [upload_job.py:push():131] Uploaded file /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/conda-environment.yaml
+2024-05-25 11:21:14,303 INFO    wandb-upload_2:841954 [upload_job.py:push():131] Uploaded file /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/files/requirements.txt
+2024-05-25 11:21:14,443 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: poll_exit
+2024-05-25 11:21:14,444 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: poll_exit
+2024-05-25 11:21:14,504 INFO    Thread-16 (_thread_body):841954 [sender.py:transition_state():614] send defer: 11
+2024-05-25 11:21:14,506 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: defer
+2024-05-25 11:21:14,506 INFO    HandlerThread:841954 [handler.py:handle_request_defer():172] handle defer: 11
+2024-05-25 11:21:14,507 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: defer
+2024-05-25 11:21:14,508 INFO    SenderThread:841954 [sender.py:send_request_defer():610] handle sender defer: 11
+2024-05-25 11:21:14,508 INFO    SenderThread:841954 [file_pusher.py:join():178] waiting for file pusher
+2024-05-25 11:21:14,509 INFO    SenderThread:841954 [sender.py:transition_state():614] send defer: 12
+2024-05-25 11:21:14,509 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: defer
+2024-05-25 11:21:14,510 INFO    HandlerThread:841954 [handler.py:handle_request_defer():172] handle defer: 12
+2024-05-25 11:21:14,510 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: defer
+2024-05-25 11:21:14,511 INFO    SenderThread:841954 [sender.py:send_request_defer():610] handle sender defer: 12
+2024-05-25 11:21:14,511 INFO    SenderThread:841954 [file_stream.py:finish():614] file stream finish called
+2024-05-25 11:21:15,008 INFO    SenderThread:841954 [file_stream.py:finish():618] file stream finish is done
+2024-05-25 11:21:15,008 INFO    SenderThread:841954 [sender.py:transition_state():614] send defer: 13
+2024-05-25 11:21:15,008 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: defer
+2024-05-25 11:21:15,009 INFO    HandlerThread:841954 [handler.py:handle_request_defer():172] handle defer: 13
+2024-05-25 11:21:15,010 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: defer
+2024-05-25 11:21:15,010 INFO    SenderThread:841954 [sender.py:send_request_defer():610] handle sender defer: 13
+2024-05-25 11:21:15,010 INFO    SenderThread:841954 [sender.py:transition_state():614] send defer: 14
+2024-05-25 11:21:15,012 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: defer
+2024-05-25 11:21:15,012 DEBUG   SenderThread:841954 [sender.py:send():379] send: final
+2024-05-25 11:21:15,012 INFO    HandlerThread:841954 [handler.py:handle_request_defer():172] handle defer: 14
+2024-05-25 11:21:15,013 DEBUG   SenderThread:841954 [sender.py:send():379] send: footer
+2024-05-25 11:21:15,013 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: defer
+2024-05-25 11:21:15,014 INFO    SenderThread:841954 [sender.py:send_request_defer():610] handle sender defer: 14
+2024-05-25 11:21:15,016 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: poll_exit
+2024-05-25 11:21:15,016 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: poll_exit
+2024-05-25 11:21:15,018 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: internal_messages
+2024-05-25 11:21:15,020 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: server_info
+2024-05-25 11:21:15,021 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: get_summary
+2024-05-25 11:21:15,021 DEBUG   SenderThread:841954 [sender.py:send_request():406] send_request: server_info
+2024-05-25 11:21:15,029 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: sampled_history
+2024-05-25 11:21:15,188 DEBUG   HandlerThread:841954 [handler.py:handle_request():146] handle_request: shutdown
+2024-05-25 11:21:15,189 INFO    HandlerThread:841954 [handler.py:finish():866] shutting down handler
+2024-05-25 11:21:16,021 INFO    WriterThread:841954 [datastore.py:close():296] close: /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/run-z4mgspzx.wandb
+2024-05-25 11:21:16,187 INFO    SenderThread:841954 [sender.py:finish():1546] shutting down sender
+2024-05-25 11:21:16,187 INFO    SenderThread:841954 [file_pusher.py:finish():172] shutting down file pusher
+2024-05-25 11:21:16,187 INFO    SenderThread:841954 [file_pusher.py:join():178] waiting for file pusher

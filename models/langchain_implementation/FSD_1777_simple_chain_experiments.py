@@ -56,24 +56,24 @@ chatModelAI = ChatOpenAI(temperature=0)
 # chatModel_llama13b = llmModels.loadLlamma()
 
 # # # Mistral 7B chat
-# chatModel_mistral7b = llmModels.loadMistral7b()
+# chatModel_mistral7b = llmModels.loadMistral7b() 
 
 # #70B
-# chatModel_llama70b = llmModels.loadLlama2_70B()
+chatModel_llama70b = llmModels.loadLlama2_70B()
 
 ## Llama 3 8B
-chatModel_llama3_8B = llmModels.loadLlama3_8B() 
+# chatModel_llama3_8B = llmModels.loadLlama3_8B() 
 
 ##FSD_1777
-# dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/FSD1777_Oct23.json"
-# dateFrom = "2023-10-19T09:00:00+00:00" #2023-10-19T18:58:41Z for 200 tweets
-# dateTo = "2023-10-19T18:00:00+00:00"
+dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/FSD1777_Oct23.json"
+dateFrom = "2023-10-19T09:00:00+00:00" #2023-10-19T18:58:41Z for 200 tweets
+dateTo = "2023-10-19T18:00:00+00:00"
 
 #FSD_1555
 # dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/fsd_1555_0601_06_15.pkl"
-dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/fsd_1555_Japan_06_15.pkl"
-dateFrom = "2023-06-01 06:00:00+00:00" 
-dateTo = "2023-06-01 13:00:00+00:00" 
+# dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/fsd_1555_Japan_06_15.pkl"
+# dateFrom = "2023-06-01 06:00:00+00:00" 
+# dateTo = "2023-06-01 13:00:00+00:00" 
 
 """Load relevant fields of flood tags api json response"""
 def dataframe_dataloader(dataPath = dataPath, dateFrom = dateFrom, dateTo = dateTo):
@@ -242,8 +242,8 @@ def json_dataloader(dataPath = dataPath, dateFrom = dateFrom, dateTo = dateTo):
     return df
 
 def bgeEmbeddings():
-    # model_name = "BAAI/bge-large-en-v1.5"
-    model_name = "BAAI/bge-m3"
+    model_name = "BAAI/bge-large-en-v1.5"
+    # model_name = "BAAI/bge-m3"
     model_kwargs = {'device': 'cuda'}
     encode_kwargs = {'normalize_embeddings': True} # set True to compute cosine similarity
     model = HuggingFaceBgeEmbeddings(
@@ -384,10 +384,10 @@ def train_sweeps(config = None):
         config = wandb.config
          
         # # Load the data from source
-        # data = json_dataloader()
+        data = json_dataloader()
 
         # Load the data from source - FSD 1555
-        data = dataframe_dataloader()
+        # data = dataframe_dataloader()
 
         # Loading pandas dataframe from picke file
         # data = dataframe_dataloader()
@@ -402,12 +402,11 @@ def train_sweeps(config = None):
             vectorstore = data_embedding(data, metric= retrieval_distance_metric)
 
         # Get retriever
-        # if config.Cross_Encoder_rerank == "Yes":
-        #     retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': config.k}))
-        # else:
-        #     retriever = vectorstore.as_retriever(search_kwargs={'k': config.k})
+        if config.Cross_Encoder_rerank == "Yes":
+            retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': config.k}))
+        else:
+            retriever = vectorstore.as_retriever(search_kwargs={'k': config.k})
 
-        retriever = Custom_ja_Retriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': config.k}))
 
         #  LLM initialisation
         if (config.LLM == "Llama-2-13b-chat-hf"):
@@ -451,7 +450,7 @@ def train_sweeps(config = None):
             contexts.append([docs.page_content for docs in response['source_documents']])
 
         #FSD_XXXX
-        ground_truths = [groundTruths.gt_FSD1555_peak_fw]
+        ground_truths = [groundTruths.gt_FSD1777_peak_fw]
 
         # To dict
         data = {
@@ -502,63 +501,63 @@ def run_sweep():
         'method': 'grid'
     }
 
-    # for i in range(5):
+    for i in range(5):
 
-    parameters_dict = {
-    'k': {
-        'values': [40]
+        parameters_dict = {
+        'k': {
+            'values': [20]
+            },
+        'LLM': {
+            'values': ["Llama-2-70b-chat-hf"]  #"Llama-2-13b-chat-hf"   # "Llama-2-70b-chat-hf" # "Llama-3-8b-chat-hf" #"Mistral-7B-Instruct-v0.2"
+            },
+        'Cross_Encoder_rerank': {
+            'values' : ["No"]
+            },
+        'Retrieval_type': {
+            'values' : ["Query"]
         },
-    'LLM': {
-        'values': ["Llama-3-8b-chat-hf"] #"Llama-2-13b-chat-hf"   # "Llama-2-70b-chat-hf" # "Llama-3-8b-chat-hf" #"Mistral-7B-Instruct-v0.2"
+        'Retrieval_distance_metric': {
+            'values' : ["L2"]
         },
-    'Cross_Encoder_rerank': {
-        'values' : ["No"]
+        'Analysis_question': {
+        'values' : ["Which locations have received evacuation orders due to Storm Babet?"]
+        }
+        }
+
+        sweep_config['parameters'] = parameters_dict  
+        #Initialise sweep
+        sweep_id = wandb.sweep(sweep_config, project="FFSD_1777_Human_Eval_EO") #FW_1777_AER_LongContext_LLMs #FFSD_1777_Human_Eval
+        wandb.agent(sweep_id, train_sweeps)
+
+    for i in range(5):
+
+        parameters_dict = {
+        'k': {
+            'values': [40]
+            },
+        'LLM': {
+            'values': ["Llama-2-70b-chat-hf"] #"Llama-2-13b-chat-hf"   # "Llama-2-70b-chat-hf" # "Llama-3-8b-chat-hf" #"Mistral-7B-Instruct-v0.2"
+            },
+        'Cross_Encoder_rerank': {
+            'values' : ["No"]
+            },
+        'Retrieval_type': {
+            'values' : ["Query"]
         },
-    'Retrieval_type': {
-        'values' : ["Query"]
-    },
-    'Retrieval_distance_metric': {
-        'values' : ["L2"]
-    },
-    'Analysis_question': {
-    'values' : ["Which locations are likely to receive flood warnings due to heavy rain?"]
-    }
-    }
+        'Retrieval_distance_metric': {
+            'values' : ["L2"]
+        },
+        'Analysis_question': {
+        'values' : ["Which locations have received evacuation orders due to Storm Babet?"]
+        }
+        }
 
-    sweep_config['parameters'] = parameters_dict  
-    #Initialise sweep
-    sweep_id = wandb.sweep(sweep_config, project="FSD_1555_Human_Eval_FloodWarn") #FW_1777_AER_LongContext_LLMs #FFSD_1777_Human_Eval
-    wandb.agent(sweep_id, train_sweeps)
+        sweep_config['parameters'] = parameters_dict  
+        #Initialise sweep
+        sweep_id = wandb.sweep(sweep_config, project="FFSD_1777_Human_Eval_EO") #FW_1777_AER_LongContext_LLMs #FFSD_1777_Human_Eval
+        wandb.agent(sweep_id, train_sweeps)
 
-    # for i in range(5):
-
-    #     parameters_dict = {
-    #     'k': {
-    #         'values': [40]
-    #         },
-    #     'LLM': {
-    #         'values': ["Llama-2-70b-chat-hf"] #"Llama-2-13b-chat-hf"   # "Llama-2-70b-chat-hf" # "Llama-3-8b-chat-hf" #"Mistral-7B-Instruct-v0.2"
-    #         },
-    #     'Cross_Encoder_rerank': {
-    #         'values' : ["No"]
-    #         },
-    #     'Retrieval_type': {
-    #         'values' : ["Query"]
-    #     },
-    #     'Retrieval_distance_metric': {
-    #         'values' : ["L2"]
-    #     },
-    #     'Analysis_question': {
-    #     'values' : ["Which locations are likely to receive flood warnings due to heavy rain?"]
-    #     }
-    #     }
-
-    #     sweep_config['parameters'] = parameters_dict  
-    #     #Initialise sweep
-    #     sweep_id = wandb.sweep(sweep_config, project="FSD_1555_Human_Eval_FloodWarn") #FW_1777_AER_LongContext_LLMs #FFSD_1777_Human_Eval
-    #     wandb.agent(sweep_id, train_sweeps)
-
-    # for i in range(5):
+    # for i in range(2):
 
     #     parameters_dict = {
     #     'k': {
@@ -577,13 +576,13 @@ def run_sweep():
     #         'values' : ["L2"]
     #     },
     #     'Analysis_question': {
-    #     'values' : ["Which locations are likely to receive flood warnings due to heavy rain?"]
+    #     'values' : ["Which locations are receiving flood warnings?"]
     #     }
     #     }
 
     #     sweep_config['parameters'] = parameters_dict  
     #     #Initialise sweep
-    #     sweep_id = wandb.sweep(sweep_config, project="FSD_1555_Human_Eval_FloodWarn") #FW_1777_AER_LongContext_LLMs #FFSD_1777_Human_Eval
+    #     sweep_id = wandb.sweep(sweep_config, project="FSD_1777_Human_Eval_FW_P2") #FW_1777_AER_LongContext_LLMs #FFSD_1777_Human_Eval
     #     wandb.agent(sweep_id, train_sweeps)
 
     # for i in range(5):

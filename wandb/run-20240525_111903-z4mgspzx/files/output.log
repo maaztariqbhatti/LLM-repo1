@@ -1,0 +1,29 @@
+
+REMOVE 559 document(s) from langchain collection
+559
+Traceback (most recent call last):
+  File "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/simple_chain_experiments", line 449, in train_sweeps
+    response = default_chain.invoke(query)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mbhatti/miniconda3/envs/llama/lib/python3.11/site-packages/langchain/chains/base.py", line 162, in invoke
+    raise e
+  File "/home/mbhatti/miniconda3/envs/llama/lib/python3.11/site-packages/langchain/chains/base.py", line 156, in invoke
+    self._call(inputs, run_manager=run_manager)
+  File "/home/mbhatti/miniconda3/envs/llama/lib/python3.11/site-packages/langchain/chains/retrieval_qa/base.py", line 141, in _call
+    docs = self._get_docs(question, run_manager=_run_manager)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mbhatti/miniconda3/envs/llama/lib/python3.11/site-packages/langchain/chains/retrieval_qa/base.py", line 221, in _get_docs
+    return self.retriever.get_relevant_documents(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mbhatti/miniconda3/envs/llama/lib/python3.11/site-packages/langchain_core/retrievers.py", line 223, in get_relevant_documents
+    raise e
+  File "/home/mbhatti/miniconda3/envs/llama/lib/python3.11/site-packages/langchain_core/retrievers.py", line 220, in get_relevant_documents
+    result = self._get_relevant_documents(query, **_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/simple_chain_experiments", line 203, in get_relevant_documents
+    indexes.append(df_ja[df_ja['text'] ==tweet].index[0])
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "/home/mbhatti/miniconda3/envs/llama/lib/python3.11/site-packages/pandas/core/indexes/base.py", line 5366, in __getitem__
+    return getitem(key)
+           ^^^^^^^^^^^^
+IndexError: index 0 is out of bounds for axis 0 with size 0

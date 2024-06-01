@@ -59,7 +59,7 @@ def loadLlamma():
             # temperature = 0.1,
             do_sample=False,
             repetition_penalty=1.1,
-            max_new_tokens = 512
+            max_new_tokens = 650
         )
 
     chatModel= HuggingFacePipeline(pipeline=pipeline)
@@ -85,7 +85,7 @@ def loadMistral7b():
             return_full_text = True,
             tokenizer = tokenizer_m7b,
             do_sample=False,
-            max_new_tokens = 512
+            max_new_tokens = 650
         )
     chatModel= HuggingFacePipeline(pipeline=pipeline_m7b)
 
@@ -137,7 +137,7 @@ def loadLlama2_70B():
     task='text-generation',
     # we pass model parameters here too
     do_sample=False,  # 'randomness' of outputs, 0.0 is the min and 1.0 the max
-    max_new_tokens=512,  # mex number of tokens to generate in the output
+    max_new_tokens=650,  # mex number of tokens to generate in the output
     repetition_penalty=1.1  # without this output begins repeating,
     )
 
@@ -174,7 +174,7 @@ def loadLlama3_8B():
     return_full_text=True,  # langchain expects the full text
     task='text-generation',
     do_sample=False, # 'randomness' of outputs, 0.0 is the min and 1.0 the max
-    max_new_tokens=512  # mex number of tokens to generate in the output
+    max_new_tokens=650  # mex number of tokens to generate in the output
     )
 
     chatModel= HuggingFacePipeline(pipeline=pipeline)
