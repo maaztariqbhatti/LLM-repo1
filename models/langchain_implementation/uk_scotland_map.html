@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    
+        <script>
+            L_NO_TOUCH = false;
+            L_DISABLE_3D = false;
+        </script>
+    
+    <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
+    <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_55e542bd9e0e6f5045682a46fc8af094 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_55e542bd9e0e6f5045682a46fc8af094" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_55e542bd9e0e6f5045682a46fc8af094 = L.map(
+                "map_55e542bd9e0e6f5045682a46fc8af094",
+                {
+                    center: [55.3781, -3.436],
+                    crs: L.CRS.EPSG3857,
+                    zoom: 6,
+                    zoomControl: true,
+                    preferCanvas: false,
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_f74c18d75e7dd5ad9cd94deb70fa7713 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {"attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors", "detectRetina": false, "maxNativeZoom": 19, "maxZoom": 19, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
+            );
+        
+    
+            tile_layer_f74c18d75e7dd5ad9cd94deb70fa7713.addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+            var marker_5c44e885fb9747dd04ee5602a52774ef = L.marker(
+                [56.0, 3.0],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_603baa846d047a53fb1b33ba4afa21cf = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_fb693351b07afc5ab30d0dba481a083f = $(`<div id="html_fb693351b07afc5ab30d0dba481a083f" style="width: 100.0%; height: 100.0%;">North Sea</div>`)[0];
+                popup_603baa846d047a53fb1b33ba4afa21cf.setContent(html_fb693351b07afc5ab30d0dba481a083f);
+            
+        
+
+        marker_5c44e885fb9747dd04ee5602a52774ef.bindPopup(popup_603baa846d047a53fb1b33ba4afa21cf)
+        ;
+
+        
+    
+    
+            var marker_0605f7064e199633a5614ae67f5e29f3 = L.marker(
+                [55.008, -1.447],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_bdaa8633351b08ba26ff4d9ee4493511 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_b3d103584d4e8b8bcce6f01116fd2df6 = $(`<div id="html_b3d103584d4e8b8bcce6f01116fd2df6" style="width: 100.0%; height: 100.0%;">North Shields</div>`)[0];
+                popup_bdaa8633351b08ba26ff4d9ee4493511.setContent(html_b3d103584d4e8b8bcce6f01116fd2df6);
+            
+        
+
+        marker_0605f7064e199633a5614ae67f5e29f3.bindPopup(popup_bdaa8633351b08ba26ff4d9ee4493511)
+        ;
+
+        
+    
+    
+            var marker_f93a77abba4e9940ee213b1b9eb1553f = L.marker(
+                [54.998, -1.432],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_aed6bb9a86537aaabbf3f4088e728be8 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_95ba06d40f2964758f5e8ffb173fa9a2 = $(`<div id="html_95ba06d40f2964758f5e8ffb173fa9a2" style="width: 100.0%; height: 100.0%;">South Shields</div>`)[0];
+                popup_aed6bb9a86537aaabbf3f4088e728be8.setContent(html_95ba06d40f2964758f5e8ffb173fa9a2);
+            
+        
+
+        marker_f93a77abba4e9940ee213b1b9eb1553f.bindPopup(popup_aed6bb9a86537aaabbf3f4088e728be8)
+        ;
+
+        
+    
+    
+            var marker_6ea5f7ed9b5127acf149fad3ac581dec = L.marker(
+                [52.204, -2.224],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_a597c4ca02424010eec6c3ba50d1c419 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_cb7de9478df394967758abceed028da4 = $(`<div id="html_cb7de9478df394967758abceed028da4" style="width: 100.0%; height: 100.0%;">Barbourne (Worcester)</div>`)[0];
+                popup_a597c4ca02424010eec6c3ba50d1c419.setContent(html_cb7de9478df394967758abceed028da4);
+            
+        
+
+        marker_6ea5f7ed9b5127acf149fad3ac581dec.bindPopup(popup_a597c4ca02424010eec6c3ba50d1c419)
+        ;
+
+        
+    
+    
+            var marker_8068bae915e6989ff2b06b43090f7437 = L.marker(
+                [53.322, -0.943],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_a023be2848624b6a6261a952b88b6467 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_21215487764ebd87df70699612f7bb05 = $(`<div id="html_21215487764ebd87df70699612f7bb05" style="width: 100.0%; height: 100.0%;">River Maun (near Retford)</div>`)[0];
+                popup_a023be2848624b6a6261a952b88b6467.setContent(html_21215487764ebd87df70699612f7bb05);
+            
+        
+
+        marker_8068bae915e6989ff2b06b43090f7437.bindPopup(popup_a023be2848624b6a6261a952b88b6467)
+        ;
+
+        
+    
+    
+            var marker_425d98ed641c337511e32ffbf7cfc47f = L.marker(
+                [54.084, -0.2],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_68b35cd42da78640321ed815af91cf8c = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_53c5cb5545faa7c77cc51fdf868615b1 = $(`<div id="html_53c5cb5545faa7c77cc51fdf868615b1" style="width: 100.0%; height: 100.0%;">Bridlington (Yorkshire)</div>`)[0];
+                popup_68b35cd42da78640321ed815af91cf8c.setContent(html_53c5cb5545faa7c77cc51fdf868615b1);
+            
+        
+
+        marker_425d98ed641c337511e32ffbf7cfc47f.bindPopup(popup_68b35cd42da78640321ed815af91cf8c)
+        ;
+
+        
+    
+    
+            var marker_278c65c20245398ada94323cf78122f1 = L.marker(
+                [54.28, -0.402],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_a2d198361a3041748f24f3d2a25c22c4 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_4c74da7f71c01d67991615008bff23aa = $(`<div id="html_4c74da7f71c01d67991615008bff23aa" style="width: 100.0%; height: 100.0%;">Scarborough (Yorkshire)</div>`)[0];
+                popup_a2d198361a3041748f24f3d2a25c22c4.setContent(html_4c74da7f71c01d67991615008bff23aa);
+            
+        
+
+        marker_278c65c20245398ada94323cf78122f1.bindPopup(popup_a2d198361a3041748f24f3d2a25c22c4)
+        ;
+
+        
+    
+    
+            var marker_f05a68b6b061818fdf0ae4bb5a9f9b2d = L.marker(
+                [55.0, -1.45],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_10869c149b29c6b98eb9c71eb6c1e629 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_45d51cf628731283cc5a4218f3e21d12 = $(`<div id="html_45d51cf628731283cc5a4218f3e21d12" style="width: 100.0%; height: 100.0%;">Tyne (at North and South Shields)</div>`)[0];
+                popup_10869c149b29c6b98eb9c71eb6c1e629.setContent(html_45d51cf628731283cc5a4218f3e21d12);
+            
+        
+
+        marker_f05a68b6b061818fdf0ae4bb5a9f9b2d.bindPopup(popup_10869c149b29c6b98eb9c71eb6c1e629)
+        ;
+
+        
+    
+    
+            var marker_df2926e103a9b1bd3e99be33fb2a8bac = L.marker(
+                [57.149, -2.094],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_ed019c73f7d34e4947da79b79558ebe9 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_0a7cdd6f9b3a35821307631efb832432 = $(`<div id="html_0a7cdd6f9b3a35821307631efb832432" style="width: 100.0%; height: 100.0%;">Aberdeenshire</div>`)[0];
+                popup_ed019c73f7d34e4947da79b79558ebe9.setContent(html_0a7cdd6f9b3a35821307631efb832432);
+            
+        
+
+        marker_df2926e103a9b1bd3e99be33fb2a8bac.bindPopup(popup_ed019c73f7d34e4947da79b79558ebe9)
+        ;
+
+        
+    
+    
+            var marker_f3708e438e992ce8838f28b3e819d09e = L.marker(
+                [56.704, -2.89],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_de9efcbb9f92c3082861258e25849e02 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_959483ed161f6f8e4f00435c3f54e664 = $(`<div id="html_959483ed161f6f8e4f00435c3f54e664" style="width: 100.0%; height: 100.0%;">Angus</div>`)[0];
+                popup_de9efcbb9f92c3082861258e25849e02.setContent(html_959483ed161f6f8e4f00435c3f54e664);
+            
+        
+
+        marker_f3708e438e992ce8838f28b3e819d09e.bindPopup(popup_de9efcbb9f92c3082861258e25849e02)
+        ;
+
+        
+    
+    
+            var marker_efa98970a907b417a88f2e12eae89bed = L.marker(
+                [56.462, -2.97],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_a5de3262d95561c6cce6b77ccba7407e = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_cb0acd72291aade2eba03ed8eeab5914 = $(`<div id="html_cb0acd72291aade2eba03ed8eeab5914" style="width: 100.0%; height: 100.0%;">Dundee</div>`)[0];
+                popup_a5de3262d95561c6cce6b77ccba7407e.setContent(html_cb0acd72291aade2eba03ed8eeab5914);
+            
+        
+
+        marker_efa98970a907b417a88f2e12eae89bed.bindPopup(popup_a5de3262d95561c6cce6b77ccba7407e)
+        ;
+
+        
+    
+    
+            var marker_8188365466358d1fb01ebebc66788d65 = L.marker(
+                [56.395, -3.431],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_8b49383098eeed17fd0da96cd7e42da6 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_69d308d8a84a0691045fd09a842b4131 = $(`<div id="html_69d308d8a84a0691045fd09a842b4131" style="width: 100.0%; height: 100.0%;">Perth & Kinross</div>`)[0];
+                popup_8b49383098eeed17fd0da96cd7e42da6.setContent(html_69d308d8a84a0691045fd09a842b4131);
+            
+        
+
+        marker_8188365466358d1fb01ebebc66788d65.bindPopup(popup_8b49383098eeed17fd0da96cd7e42da6)
+        ;
+
+        
+    
+    
+            var marker_5a79ea5cfa9f18ccc6fba5b0961cae22 = L.marker(
+                [57.284, -2.379],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_843501e1331ae960c9321cbb023652aa = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_cc0f009d32b2ee298ff3bf0f1f4e40da = $(`<div id="html_cc0f009d32b2ee298ff3bf0f1f4e40da" style="width: 100.0%; height: 100.0%;">Inverurie</div>`)[0];
+                popup_843501e1331ae960c9321cbb023652aa.setContent(html_cc0f009d32b2ee298ff3bf0f1f4e40da);
+            
+        
+
+        marker_5a79ea5cfa9f18ccc6fba5b0961cae22.bindPopup(popup_843501e1331ae960c9321cbb023652aa)
+        ;
+
+        
+    
+    
+            var marker_b99cffd07919bdc7abe989ceecbf4867 = L.marker(
+                [56.704, -3.729],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_19b1dc4e039fb1576f4a8bf3a9543ee9 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_4745fdfc7b05dc20dc718e2d4f2dba85 = $(`<div id="html_4745fdfc7b05dc20dc718e2d4f2dba85" style="width: 100.0%; height: 100.0%;">Perthshire</div>`)[0];
+                popup_19b1dc4e039fb1576f4a8bf3a9543ee9.setContent(html_4745fdfc7b05dc20dc718e2d4f2dba85);
+            
+        
+
+        marker_b99cffd07919bdc7abe989ceecbf4867.bindPopup(popup_19b1dc4e039fb1576f4a8bf3a9543ee9)
+        ;
+
+        
+    
+    
+            var marker_f4b2533eb5d83cb2301fb079b4e0eb81 = L.marker(
+                [57.655, -3.608],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_e0f39fdfeb74b3391f8144c6c4815c54 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_f10158b995554fdd15220515c24d8365 = $(`<div id="html_f10158b995554fdd15220515c24d8365" style="width: 100.0%; height: 100.0%;">Findhorn</div>`)[0];
+                popup_e0f39fdfeb74b3391f8144c6c4815c54.setContent(html_f10158b995554fdd15220515c24d8365);
+            
+        
+
+        marker_f4b2533eb5d83cb2301fb079b4e0eb81.bindPopup(popup_e0f39fdfeb74b3391f8144c6c4815c54)
+        ;
+
+        
+    
+    
+            var marker_c8b1e0156aa2466ea06cd39ac0d625e9 = L.marker(
+                [57.583, -3.872],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_e81d6beedb0d1a0a770da2e78499944e = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_2d8fa4176cbaee4002a58b9f04fdbbef = $(`<div id="html_2d8fa4176cbaee4002a58b9f04fdbbef" style="width: 100.0%; height: 100.0%;">Nairn</div>`)[0];
+                popup_e81d6beedb0d1a0a770da2e78499944e.setContent(html_2d8fa4176cbaee4002a58b9f04fdbbef);
+            
+        
+
+        marker_c8b1e0156aa2466ea06cd39ac0d625e9.bindPopup(popup_e81d6beedb0d1a0a770da2e78499944e)
+        ;
+
+        
+    
+    
+            var marker_2e74de9bce26f00624578abc81c8c5eb = L.marker(
+                [57.613, -3.308],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_7b800ddf32d874f46e11e61f43500f50 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_f49a54575c1151f43d0f43097918fd6c = $(`<div id="html_f49a54575c1151f43d0f43097918fd6c" style="width: 100.0%; height: 100.0%;">Moray</div>`)[0];
+                popup_7b800ddf32d874f46e11e61f43500f50.setContent(html_f49a54575c1151f43d0f43097918fd6c);
+            
+        
+
+        marker_2e74de9bce26f00624578abc81c8c5eb.bindPopup(popup_7b800ddf32d874f46e11e61f43500f50)
+        ;
+
+        
+    
+    
+            var marker_63d7acebc8323b45885eebbefc017fb8 = L.marker(
+                [57.476, -3.333],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_9b0c8a771a949d6ee382e673acac4a30 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_9f7bde0a5e178e7c83d4024781fe4e99 = $(`<div id="html_9f7bde0a5e178e7c83d4024781fe4e99" style="width: 100.0%; height: 100.0%;">Speyside region</div>`)[0];
+                popup_9b0c8a771a949d6ee382e673acac4a30.setContent(html_9f7bde0a5e178e7c83d4024781fe4e99);
+            
+        
+
+        marker_63d7acebc8323b45885eebbefc017fb8.bindPopup(popup_9b0c8a771a949d6ee382e673acac4a30)
+        ;
+
+        
+    
+    
+            var marker_8c6f65970c83b0c748a9a489fb9f2e1b = L.marker(
+                [56.731, -2.656],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_d0a87cc0f23333fde0634d64657114ee = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_2f9fa09fadbe8b1e417f4492c638ef79 = $(`<div id="html_2f9fa09fadbe8b1e417f4492c638ef79" style="width: 100.0%; height: 100.0%;">Brechin (Angus)</div>`)[0];
+                popup_d0a87cc0f23333fde0634d64657114ee.setContent(html_2f9fa09fadbe8b1e417f4492c638ef79);
+            
+        
+
+        marker_8c6f65970c83b0c748a9a489fb9f2e1b.bindPopup(popup_d0a87cc0f23333fde0634d64657114ee)
+        ;
+
+        
+    
+    
+            var marker_c27914cfd3eb2f2c237febe171b7e926 = L.marker(
+                [57.167, -2.1],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_0b06b45c02bfbe9d2e1ee7a0f9661197 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_1b95936b023374d3a5dc5af1ec7640e8 = $(`<div id="html_1b95936b023374d3a5dc5af1ec7640e8" style="width: 100.0%; height: 100.0%;">River Don (Aberdeenshire)</div>`)[0];
+                popup_0b06b45c02bfbe9d2e1ee7a0f9661197.setContent(html_1b95936b023374d3a5dc5af1ec7640e8);
+            
+        
+
+        marker_c27914cfd3eb2f2c237febe171b7e926.bindPopup(popup_0b06b45c02bfbe9d2e1ee7a0f9661197)
+        ;
+
+        
+    
+    
+            var marker_e483e2582432e434015e7def09594c1d = L.marker(
+                [56.591, -3.34],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_cfc8b176b2de162881a644c44598a67e = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_ce57f1daafe0e6f9031e4608b48a0ab2 = $(`<div id="html_ce57f1daafe0e6f9031e4608b48a0ab2" style="width: 100.0%; height: 100.0%;">Blairgowrie</div>`)[0];
+                popup_cfc8b176b2de162881a644c44598a67e.setContent(html_ce57f1daafe0e6f9031e4608b48a0ab2);
+            
+        
+
+        marker_e483e2582432e434015e7def09594c1d.bindPopup(popup_cfc8b176b2de162881a644c44598a67e)
+        ;
+
+        
+    
+    
+            var marker_d73b42c95a28a6b057c4effc482ae918 = L.marker(
+                [56.616, -3.34],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_f1ca273959d5519719dd5c9c0fda3963 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_7696590ecdd5661cefc2364e7ec50e92 = $(`<div id="html_7696590ecdd5661cefc2364e7ec50e92" style="width: 100.0%; height: 100.0%;">River Isla</div>`)[0];
+                popup_f1ca273959d5519719dd5c9c0fda3963.setContent(html_7696590ecdd5661cefc2364e7ec50e92);
+            
+        
+
+        marker_d73b42c95a28a6b057c4effc482ae918.bindPopup(popup_f1ca273959d5519719dd5c9c0fda3963)
+        ;
+
+        
+    
+    
+            var marker_f97c4a95cc4a1ed5e4585603e3326408 = L.marker(
+                [56.644, -2.888],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_d28f60d581498d795ebf139b17fa6371 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_3bdab1e3906c37a9223b29ede0337069 = $(`<div id="html_3bdab1e3906c37a9223b29ede0337069" style="width: 100.0%; height: 100.0%;">Forfar (Angus)</div>`)[0];
+                popup_d28f60d581498d795ebf139b17fa6371.setContent(html_3bdab1e3906c37a9223b29ede0337069);
+            
+        
+
+        marker_f97c4a95cc4a1ed5e4585603e3326408.bindPopup(popup_d28f60d581498d795ebf139b17fa6371)
+        ;
+
+        
+    
+    
+            var marker_de1a08da74442e23016371f1cf8e1c54 = L.marker(
+                [53.233, -0.95],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_14b7a742dd3151d9b7bc9bed4402a893 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_b792b675128e9ab2c55b2f82e0f50012 = $(`<div id="html_b792b675128e9ab2c55b2f82e0f50012" style="width: 100.0%; height: 100.0%;">Haughton (Nottinghamshire)</div>`)[0];
+                popup_14b7a742dd3151d9b7bc9bed4402a893.setContent(html_b792b675128e9ab2c55b2f82e0f50012);
+            
+        
+
+        marker_de1a08da74442e23016371f1cf8e1c54.bindPopup(popup_14b7a742dd3151d9b7bc9bed4402a893)
+        ;
+
+        
+    
+    
+            var marker_ea1ac5a2cb201ecbbfa4dc4690922d77 = L.marker(
+                [53.283, -0.95],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_53397b9f08f10c7eddbaafb0a8454580 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_428c3e56ff7a852cf5d62f5d20d33a72 = $(`<div id="html_428c3e56ff7a852cf5d62f5d20d33a72" style="width: 100.0%; height: 100.0%;">Milton (Nottinghamshire)</div>`)[0];
+                popup_53397b9f08f10c7eddbaafb0a8454580.setContent(html_428c3e56ff7a852cf5d62f5d20d33a72);
+            
+        
+
+        marker_ea1ac5a2cb201ecbbfa4dc4690922d77.bindPopup(popup_53397b9f08f10c7eddbaafb0a8454580)
+        ;
+
+        
+    
+    
+            var marker_8fc7e67ba86216762ff1297f4870d982 = L.marker(
+                [53.25, -0.95],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_72a0ca33bd9838569793de9b992961fb = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_e04a895fc8dffafe053c93155aad5404 = $(`<div id="html_e04a895fc8dffafe053c93155aad5404" style="width: 100.0%; height: 100.0%;">West Drayton (Nottinghamshire)</div>`)[0];
+                popup_72a0ca33bd9838569793de9b992961fb.setContent(html_e04a895fc8dffafe053c93155aad5404);
+            
+        
+
+        marker_8fc7e67ba86216762ff1297f4870d982.bindPopup(popup_72a0ca33bd9838569793de9b992961fb)
+        ;
+
+        
+    
+    
+            var marker_b1e1e2430d60e38bb3df9e7c886807f3 = L.marker(
+                [54.506, -0.671],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_da7b9e73ac078e05ed69c12c6398e88f = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_b328db58343fa61a3d7efd9fec2d3217 = $(`<div id="html_b328db58343fa61a3d7efd9fec2d3217" style="width: 100.0%; height: 100.0%;">Sandsend (North Yorkshire)</div>`)[0];
+                popup_da7b9e73ac078e05ed69c12c6398e88f.setContent(html_b328db58343fa61a3d7efd9fec2d3217);
+            
+        
+
+        marker_b1e1e2430d60e38bb3df9e7c886807f3.bindPopup(popup_da7b9e73ac078e05ed69c12c6398e88f)
+        ;
+
+        
+    
+    
+            var marker_306d3da693046d3cb48d78061bff38cb = L.marker(
+                [56.196, -3.174],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_6a16d8a530d9d16425f5a151f8eee234 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_87855e6249c9083b41ef05721b7e60a4 = $(`<div id="html_87855e6249c9083b41ef05721b7e60a4" style="width: 100.0%; height: 100.0%;">Glenrothes</div>`)[0];
+                popup_6a16d8a530d9d16425f5a151f8eee234.setContent(html_87855e6249c9083b41ef05721b7e60a4);
+            
+        
+
+        marker_306d3da693046d3cb48d78061bff38cb.bindPopup(popup_6a16d8a530d9d16425f5a151f8eee234)
+        ;
+
+        
+    
+    
+            var marker_bd1236ed531f0739ef9573962c50871d = L.marker(
+                [56.7, -2.65],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_d49b807e407c4d9d57384f448ca8de21 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_4cac054e09abfc748a96e477cb38d471 = $(`<div id="html_4cac054e09abfc748a96e477cb38d471" style="width: 100.0%; height: 100.0%;">River South Esk (Angus)</div>`)[0];
+                popup_d49b807e407c4d9d57384f448ca8de21.setContent(html_4cac054e09abfc748a96e477cb38d471);
+            
+        
+
+        marker_bd1236ed531f0739ef9573962c50871d.bindPopup(popup_d49b807e407c4d9d57384f448ca8de21)
+        ;
+
+        
+    
+    
+            var marker_17f540a1825128f9851c4543365a7cc5 = L.marker(
+                [53.142, -7.692],
+                {}
+            ).addTo(map_55e542bd9e0e6f5045682a46fc8af094);
+        
+    
+        var popup_c3daf5396b034c7dc4d077db2c218bca = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_a8f2f33ab7a4eefded618108de241960 = $(`<div id="html_a8f2f33ab7a4eefded618108de241960" style="width: 100.0%; height: 100.0%;">Ireland</div>`)[0];
+                popup_c3daf5396b034c7dc4d077db2c218bca.setContent(html_a8f2f33ab7a4eefded618108de241960);
+            
+        
+
+        marker_17f540a1825128f9851c4543365a7cc5.bindPopup(popup_c3daf5396b034c7dc4d077db2c218bca)
+        ;
+
+        
+    
+</script>
+</html>

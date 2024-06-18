@@ -48,7 +48,9 @@ date to
 
 #Pre-flood peak
 #Evacuation orders or already evacuated
-gt_FSD1777_peak_evac = ["Brechin, Angus, Scotland, villages of Tannadice and Finavon, Aberdeenshire"] #Aberdeenshire already evacuated, villages of Tannadice and Finavon (told to leave no specific evacuation orders!)
+gt_FSD1777_casualty = ["Water of Lee, Glen Esk, Angus"]
+
+gt_FSD1777_peak_evac = ["Brechin, Angus, Scotland, Aberdeenshire"] #Aberdeenshire already evacuated, villages of Tannadice and Finavon (told to leave no specific evacuation orders!)
 
 
 gt_FSD1777_peak_fw = ["Aberdeenshire, Greater Manchester, Inverurie, River Maun at Haughton, Milton and West Drayton (Nottinghamshire), Angus, Angus Glens, Perthshire, North Sea at Sandsend (North Yorkshire),  North Tyneside, South Tyneside, Brechin, Dundee, Blairgowrie, River South Esk, Lancashire, Cheshire, York, Leeds, Bradford, Halifax, Huddersfield, Sheffield, Middlesbrough, Perth, Kinross, Barbourne in Worcester, River Maun near Retford, Bridlington and Scarborough in Yorkshire, North and South Shields in Newcastle,Findhorn, Nairn, Moray, Speyside"] # 34

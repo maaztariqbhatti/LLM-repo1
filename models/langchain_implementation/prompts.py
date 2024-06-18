@@ -36,6 +36,12 @@ Answer the question based on the following context only:
 Question: {question}
 [/INST]"""
 
+prompt_template_llama_default = """<s>[INST] <<SYS>>You are a smart chatbot assistant. If you dont know the answer then dont respond with false information.<</SYS>> 
+Answer the question based on the following context only: 
+{context}
+Question: {question}
+[/INST]"""
+
 #Llama template LOCATION    
 prompt_template_llama_oneshot = """<s>[INST] <<SYS>>You are a smart researcher tasked with answering questions about location extraction. If you dont know the answer then dont respond with false information.
 Output the answer in json using the following json format : {{"locations" : ['location 1', 'location 2']}} <</SYS>> 
@@ -68,6 +74,12 @@ Output the answer only in json using the following json format : {{"locations" :
 
 #Flooded locations
 prompt_template_mistral = """<s>[INST]Act as a location extractor and extract all relevant locations with respect to the user question.
+Answer the question based on the following context only: 
+{context}
+Question: {question}
+[/INST]"""
+
+prompt_template_mistral_default = """<s>[INST]You are a smart chatbot assistant. If you dont know the answer then dont respond with false information.
 Answer the question based on the following context only: 
 {context}
 Question: {question}
@@ -110,3 +122,4 @@ Answer the question based on the following context only:
 {context}
 question: {question}
 <|eot_id|><|start_header_id|>assistant<|end_header_id|>"""
+

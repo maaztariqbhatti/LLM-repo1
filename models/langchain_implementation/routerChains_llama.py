@@ -384,7 +384,8 @@ class LangChain_analysis:
             chain = RetrievalQA.from_chain_type(llm = model,
                                 chain_type='stuff',
                                 retriever=retriever,
-                                chain_type_kwargs={"prompt": prompt}
+                                chain_type_kwargs={"prompt": prompt},
+                                return_source_documents=True
                                 )
             input_key_map = {"input": "query"}
             adapted_chain = InputAdapterChain(config=Config(destination_chain=chain, input_key_map=input_key_map))
@@ -397,7 +398,8 @@ class LangChain_analysis:
         default_chain = RetrievalQA.from_chain_type(llm = model,
                                 chain_type='stuff',
                                 retriever=retriever,
-                                chain_type_kwargs={"prompt": default_prompt}
+                                chain_type_kwargs={"prompt": default_prompt},
+                                return_source_documents=True
                                 )
 
         adapted_default_chain = InputAdapterChain(config=Config(destination_chain=default_chain, input_key_map=input_key_map))
@@ -423,8 +425,9 @@ class LangChain_analysis:
             # callbacks=[file_ballback_handler]
         )                    
 
-        return chain.invoke(input_question)
-    
+        results  = chain.invoke(input_question)
+
+        return results
     
 if __name__ == "__main__":
 
@@ -444,6 +447,7 @@ if __name__ == "__main__":
 
  #Streamlit
     st.title("SNS early flood warning 🤖")
+    response ={}
 
     #Side bar to select parameters
     with st.sidebar:
@@ -487,61 +491,77 @@ if __name__ == "__main__":
         if rerank:
             st.write("The retrieved documents will be re ranked!")
 
-    #Predefined prompts
-    col1, col2, col3, col4 = st.columns([1,1,1,1])
-    with col1:
-        floodLoc = st.button("Flood warnings")
-    with col2:
-        roadsClosure = st.button("Find roads closure")
-    with col3:
-        evacuation = st.button("Evacuation orders")
-    with col4:
-        casualties = st.button("Human casualties")
-    
+    SNSbot, Data, Map = st.tabs(["SNS bot", "Data", "Map"])
 
-    st_input = st.chat_input("Talk to me")
+    with SNSbot:
 
-    # Initialize chat history
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-
-    # Display chat messages from history on app rerun
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+        #Predefined prompts
+        col1, col2, col3, col4 = st.columns([1,1,1,1])
+        with col1:
+            floodLoc = st.button("Flood warnings")
+        with col2:
+            roadsClosure = st.button("Find roads closure")
+        with col3:
+            evacuation = st.button("Evacuation orders")
+        with col4:
+            casualties = st.button("Human casualties")
         
-    if floodLoc == True:
-        hard_prompt = "Which locations have received flood warnings?"
-        st_input = hard_prompt
-    if roadsClosure == True:
-        st_input = "Is there mention of closure of roads? If yes which roads/highways are shut down due to flooding?"
-    if evacuation == True:
-        st_input = "Which locations have received evacuation orders?"
-    if casualties == True:
-        st_input = "Have any deaths or injuries been reported?"
 
-    # React to user input
-    if prompt := st_input:
-        # Display user message in chat message container
-        with st.chat_message("user"):
-            st.markdown(prompt)
-            # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": prompt})
+        st_input = st.chat_input("Talk to me")
 
-        # Display assistant response in chat message container
-        with st.chat_message("assistant"):
-            with st.spinner():
-                langChain_analysis = LangChain_analysis(_dataPath = dataPath,
-                            _dateFrom = start_date,
-                            _dateTo = end_date)
-                #Chatbot response
-                response = langChain_analysis.predictions_response(prompt, eModel, rType, rerank, k, llm_model)['result']
-                st.markdown(response)
+        # Initialize chat history
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
 
-        # Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": response})
+        # Display chat messages from history on app rerun
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+            
+        if floodLoc == True:
+            hard_prompt = "Which locations have received flood warnings?"
+            st_input = hard_prompt
+        if roadsClosure == True:
+            st_input = "Is there mention of closure of roads? If yes which roads/highways are shut down due to flooding?"
+        if evacuation == True:
+            st_input = "Which locations have received evacuation orders?"
+        if casualties == True:
+            st_input = "Have any deaths or injuries been reported?"
 
+        # React to user input
+        if prompt := st_input:
+            # Display user message in chat message container
+            with st.chat_message("user"):
+                st.markdown(prompt)
+                # Add user message to chat history
+            st.session_state.messages.append({"role": "user", "content": prompt})
 
+            # Display assistant response in chat message container
+            with st.chat_message("assistant"):
+                with st.spinner():
+                    langChain_analysis = LangChain_analysis(_dataPath = dataPath,
+                                _dateFrom = start_date,
+                                _dateTo = end_date)
+                    #Chatbot response
+                    response = langChain_analysis.predictions_response(prompt, eModel, rType, rerank, k, llm_model)
+                    # contexts = []
+                    # contexts.append([docs.page_content for docs in response['source_documents']])
+                    # tweets_df = pd.DataFrame(contexts, columns=['Tweets'])
+
+                    st.markdown(response['result'])
+
+            # Add assistant response to chat history
+            st.session_state.messages.append({"role": "assistant", "content": response['result']})
+            
+
+    with Data:
+        # contexts = []
+        if response:
+            pd.set_option('display.max_colwidth', None)
+            tweets_df = pd.DataFrame([docs.page_content for docs in response['source_documents']], columns=["Tweets"])
+            st.dataframe(tweets_df)
+
+            # st.text(response['source_documents'])
 
 
 
