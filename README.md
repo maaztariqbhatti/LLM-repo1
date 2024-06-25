@@ -12,7 +12,7 @@ LLMs: Contains scripts to download LLMs to you conda environment
 
 langchain_implementation:
 
-routerChains_llama_agents : contains the demo presented at the Lunch and learn utilizing agentic workflow
-routerChains_llama_OpenAI : 1st demo app utilizing only router chains and Open AI models
-routerChains_llama: Demo utilizing only router chains and local LLMs
-simple_chain_experiments: Running experiments using wandb and RAGAS for auto LLM eval
+  routerChains_llama_agents : contains the demo presented at the Lunch and learn utilizing agentic workflow
+  routerChains_llama_OpenAI : 1st demo app utilizing only router chains and Open AI models
+  routerChains_llama: Demo utilizing only router chains and local LLMs
+  simple_chain_experiments: Running experiments using wandb and RAGAS for auto LLM eval
