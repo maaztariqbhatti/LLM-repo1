@@ -1,0 +1,36 @@
+2024-05-25 11:19:03,106 INFO    Thread-8 (_run_job):841327 [wandb_setup.py:_flush():76] Current SDK version is 0.16.5
+2024-05-25 11:19:03,107 INFO    Thread-8 (_run_job):841327 [wandb_setup.py:_flush():76] Configure stats pid to 841327
+2024-05-25 11:19:03,107 INFO    Thread-8 (_run_job):841327 [wandb_setup.py:_flush():76] Loading settings from /home/mbhatti/.config/wandb/settings
+2024-05-25 11:19:03,107 INFO    Thread-8 (_run_job):841327 [wandb_setup.py:_flush():76] Loading settings from /home/mbhatti/mnt/d/LLM-repo1/wandb/settings
+2024-05-25 11:19:03,107 INFO    Thread-8 (_run_job):841327 [wandb_setup.py:_flush():76] Loading settings from environment variables: {'project': 'FSD_1555_Human_Eval_EO', 'entity': 'sns-early-warning', 'root_dir': '/home/mbhatti/mnt/d/LLM-repo1', 'sweep_id': '3n8i9o2n', 'run_id': 'z4mgspzx', 'sweep_param_path': '/home/mbhatti/mnt/d/LLM-repo1/wandb/sweep-3n8i9o2n/config-z4mgspzx.yaml'}
+2024-05-25 11:19:03,107 INFO    Thread-8 (_run_job):841327 [wandb_setup.py:_flush():76] Applying setup settings: {'_disable_service': False}
+2024-05-25 11:19:03,107 INFO    Thread-8 (_run_job):841327 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'models/langchain_implementation/simple_chain_experiments', 'program_abspath': '/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/simple_chain_experiments', 'program': '/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/simple_chain_experiments'}
+2024-05-25 11:19:03,107 INFO    Thread-8 (_run_job):841327 [wandb_setup.py:_flush():76] Applying login settings: {}
+2024-05-25 11:19:03,107 INFO    Thread-8 (_run_job):841327 [wandb_init.py:_log_setup():527] Logging user logs to /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/logs/debug.log
+2024-05-25 11:19:03,108 INFO    Thread-8 (_run_job):841327 [wandb_init.py:_log_setup():528] Logging internal logs to /home/mbhatti/mnt/d/LLM-repo1/wandb/run-20240525_111903-z4mgspzx/logs/debug-internal.log
+2024-05-25 11:19:03,108 INFO    Thread-8 (_run_job):841327 [wandb_init.py:init():567] calling init triggers
+2024-05-25 11:19:03,108 INFO    Thread-8 (_run_job):841327 [wandb_init.py:init():574] wandb.init called with sweep_config: {'Analysis_question': 'Which locations are at risk of evacuation?', 'Cross_Encoder_rerank': 'No', 'LLM': 'Llama-3-8b-chat-hf', 'Retrieval_distance_metric': 'L2', 'Retrieval_type': 'Query', 'k': 30}
+config: {}
+2024-05-25 11:19:03,108 INFO    Thread-8 (_run_job):841327 [wandb_init.py:init():617] starting backend
+2024-05-25 11:19:03,108 INFO    Thread-8 (_run_job):841327 [wandb_init.py:init():621] setting up manager
+2024-05-25 11:19:03,120 INFO    Thread-8 (_run_job):841327 [backend.py:_multiprocessing_setup():105] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2024-05-25 11:19:03,124 INFO    Thread-8 (_run_job):841327 [wandb_init.py:init():629] backend started and connected
+2024-05-25 11:19:03,146 INFO    Thread-8 (_run_job):841327 [wandb_run.py:_config_callback():1347] config_cb None None {'Analysis_question': 'Which locations are at risk of evacuation?', 'Cross_Encoder_rerank': 'No', 'LLM': 'Llama-3-8b-chat-hf', 'Retrieval_distance_metric': 'L2', 'Retrieval_type': 'Query', 'k': 30}
+2024-05-25 11:19:03,148 INFO    Thread-8 (_run_job):841327 [wandb_init.py:init():721] updated telemetry
+2024-05-25 11:19:03,157 INFO    Thread-8 (_run_job):841327 [wandb_init.py:init():754] communicating run to backend with 90.0 second timeout
+2024-05-25 11:19:03,600 INFO    Thread-8 (_run_job):841327 [wandb_run.py:_on_init():2344] communicating current version
+2024-05-25 11:19:03,656 INFO    Thread-8 (_run_job):841327 [wandb_run.py:_on_init():2353] got version response upgrade_message: "wandb version 0.17.0 is available!  To upgrade, please run:\n $ pip install wandb --upgrade"
+
+2024-05-25 11:19:03,656 INFO    Thread-8 (_run_job):841327 [wandb_init.py:init():805] starting run threads in backend
+2024-05-25 11:19:05,157 INFO    Thread-8 (_run_job):841327 [wandb_run.py:_console_start():2323] atexit reg
+2024-05-25 11:19:05,158 INFO    Thread-8 (_run_job):841327 [wandb_run.py:_redirect():2178] redirect: wrap_raw
+2024-05-25 11:19:05,159 INFO    Thread-8 (_run_job):841327 [wandb_run.py:_redirect():2243] Wrapping output streams.
+2024-05-25 11:19:05,159 INFO    Thread-8 (_run_job):841327 [wandb_run.py:_redirect():2268] Redirects installed.
+2024-05-25 11:19:05,160 INFO    Thread-8 (_run_job):841327 [wandb_init.py:init():848] run started, returning control to user process
+2024-05-25 11:21:11,438 INFO    Thread-8 (_run_job):841327 [wandb_run.py:_finish():2052] finishing run sns-early-warning/FSD_1555_Human_Eval_EO/z4mgspzx
+2024-05-25 11:21:11,438 INFO    Thread-8 (_run_job):841327 [wandb_run.py:_atexit_cleanup():2292] got exitcode: 1
+2024-05-25 11:21:11,438 INFO    Thread-8 (_run_job):841327 [wandb_run.py:_restore():2275] restore
+2024-05-25 11:21:11,438 INFO    Thread-8 (_run_job):841327 [wandb_run.py:_restore():2281] restore done
+2024-05-25 11:21:16,192 INFO    Thread-8 (_run_job):841327 [wandb_run.py:_footer_history_summary_info():3920] rendering history
+2024-05-25 11:21:16,193 INFO    Thread-8 (_run_job):841327 [wandb_run.py:_footer_history_summary_info():3952] rendering summary
+2024-05-25 11:21:16,199 INFO    Thread-8 (_run_job):841327 [wandb_run.py:_footer_sync_info():3879] logging synced files

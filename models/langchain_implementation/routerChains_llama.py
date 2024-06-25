@@ -46,30 +46,67 @@ dataPath = "FSD1777_Oct23.json"
 
 
 #Llama 2
-@st.cache_resource
-def loadLlamma():
-    #Enter your local directory wehre the model is stored
-    save_path = "/home/mbhatti/mnt/d/Llama-2-13b-chat-hf"
+# @st.cache_resource
+# def loadLlamma():
+#     #Enter your local directory wehre the model is stored
+#     save_path = "/home/mbhatti/mnt/d/Llama-2-13b-chat-hf"
 
-    #Empty cuda cache
-    torch.cuda.empty_cache()
+#     #Empty cuda cache
+#     torch.cuda.empty_cache()
+#     torch.backends.cuda.enable_mem_efficient_sdp(False)
+#     torch.backends.cuda.enable_flash_sdp(False)
+
+
+#     #Call the model and tokenizer from local storage
+#     local_model = AutoModelForCausalLM.from_pretrained(save_path, return_dict=True, trust_remote_code=True, device_map="auto",torch_dtype=torch.bfloat16).to("cuda")
+#     local_tokenizer = AutoTokenizer.from_pretrained(save_path)
+
+#     pipeline = transformers.pipeline(
+#             task = "text-generation",
+#             model = local_model,
+#             return_full_text = True,
+#             tokenizer = local_tokenizer,
+#             temperature = 0.1,
+#             max_new_tokens = 512,
+#             repetition_penalty=1.1
+#         )
+
+#     chatModel= HuggingFacePipeline(pipeline=pipeline)
+
+#     return chatModel
+
+@st.cache_resource
+#Llama3-8B-Chat
+def loadLlamma():
+
+    model_id = "meta-llama/Meta-Llama-3-8B-Instruct"
     torch.backends.cuda.enable_mem_efficient_sdp(False)
     torch.backends.cuda.enable_flash_sdp(False)
 
+    model = AutoModelForCausalLM.from_pretrained(
+        model_id,
+        torch_dtype=torch.bfloat16,
+        device_map="auto").to("cuda")
 
-    #Call the model and tokenizer from local storage
-    local_model = AutoModelForCausalLM.from_pretrained(save_path, return_dict=True, trust_remote_code=True, device_map="auto",torch_dtype=torch.bfloat16).to("cuda")
-    local_tokenizer = AutoTokenizer.from_pretrained(save_path)
+    model.generation_config.temperature=None
+    model.generation_config.top_p=None
+
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+
+    terminators = [
+    tokenizer.eos_token_id,
+    tokenizer.convert_tokens_to_ids("<|eot_id|>")
+    ]
 
     pipeline = transformers.pipeline(
-            task = "text-generation",
-            model = local_model,
-            return_full_text = True,
-            tokenizer = local_tokenizer,
-            temperature = 0.1,
-            max_new_tokens = 512,
-            repetition_penalty=1.1
-        )
+    model=model, 
+    tokenizer=tokenizer,
+    eos_token_id=terminators,
+    return_full_text=True,  # langchain expects the full text
+    task='text-generation',
+    do_sample=False, # 'randomness' of outputs, 0.0 is the min and 1.0 the max
+    max_new_tokens=512  # mex number of tokens to generate in the output
+    )
 
     chatModel= HuggingFacePipeline(pipeline=pipeline)
 
@@ -157,21 +194,20 @@ class InputAdapterChain(Chain):
 
 
 class PromptFactory():
-    location_template = prompts.prompt_template_llama_loc
+    location_template = prompts.prompt_template_llama3_loc
 
     numbers_template = prompts.prompt_template_human
 
-    geocode_template = prompts.prompt_template_geocode
 
     prompt_infos = [
+        # {
+        #     'name': 'amount of rainfall detector',
+        #     'description': 'Good for summing up the number of casualties such as deaths and injuries within a context',
+        #     'prompt_template': numbers_template
+        # },
         {
-            'name': 'human_casualties_detector',
-            'description': 'Good for summing up the number of casualties such as deaths and injuries within a context',
-            'prompt_template': numbers_template
-        },
-        {
-            'name': 'flood_location_extractor',
-            'description': 'Good for extracting flooded locations from a context',
+            'name': 'location_extractor',
+            'description': 'Good for extracting locations entities from a context',
             'prompt_template': location_template
         }
     ]
@@ -330,7 +366,7 @@ class LangChain_analysis:
             retriever = vectorstore.as_retriever(search_kwargs={'k': k})
 
         #  LLM initialisation
-        if llm_model == 'Llama13bChat':
+        if llm_model == 'Llama3-8bChat':
             model = chatModel
         else:
             model = chatMistral
@@ -348,7 +384,8 @@ class LangChain_analysis:
             chain = RetrievalQA.from_chain_type(llm = model,
                                 chain_type='stuff',
                                 retriever=retriever,
-                                chain_type_kwargs={"prompt": prompt}
+                                chain_type_kwargs={"prompt": prompt},
+                                return_source_documents=True
                                 )
             input_key_map = {"input": "query"}
             adapted_chain = InputAdapterChain(config=Config(destination_chain=chain, input_key_map=input_key_map))
@@ -356,12 +393,13 @@ class LangChain_analysis:
             destination_chains[name] = adapted_chain
 
         #Default chain and prompt
-        default_prompt_template = prompts.prompt_template_default
+        default_prompt_template = prompts.prompt_template_llama3_default
         default_prompt = PromptTemplate(template = default_prompt_template, input_variables = ['question', 'context'])
         default_chain = RetrievalQA.from_chain_type(llm = model,
                                 chain_type='stuff',
                                 retriever=retriever,
-                                chain_type_kwargs={"prompt": default_prompt}
+                                chain_type_kwargs={"prompt": default_prompt},
+                                return_source_documents=True
                                 )
 
         adapted_default_chain = InputAdapterChain(config=Config(destination_chain=default_chain, input_key_map=input_key_map))
@@ -387,8 +425,9 @@ class LangChain_analysis:
             # callbacks=[file_ballback_handler]
         )                    
 
-        return chain.invoke(input_question)
-    
+        results  = chain.invoke(input_question)
+
+        return results
     
 if __name__ == "__main__":
 
@@ -408,6 +447,7 @@ if __name__ == "__main__":
 
  #Streamlit
     st.title("SNS early flood warning 🤖")
+    response ={}
 
     #Side bar to select parameters
     with st.sidebar:
@@ -421,7 +461,7 @@ if __name__ == "__main__":
         st.write("Select LLM")
         llm_model = st.selectbox(
         "LLM for inference",
-        ("Llama13bChat", "Mistral7bInstruct"),
+        ("Llama3-8bChat", "Mistral7bInstruct"),
         index=None, 
         placeholder="Select LLM...",
         )
@@ -451,61 +491,77 @@ if __name__ == "__main__":
         if rerank:
             st.write("The retrieved documents will be re ranked!")
 
-    #Predefined prompts
-    col1, col2, col3, col4 = st.columns([1,1,1,1])
-    with col1:
-        floodLoc = st.button("Flood warnings")
-    with col2:
-        roadsClosure = st.button("Find roads closure")
-    with col3:
-        evacuation = st.button("Evacuation orders")
-    with col4:
-        casualties = st.button("Human casualties")
-    
+    SNSbot, Data, Map = st.tabs(["SNS bot", "Data", "Map"])
 
-    st_input = st.chat_input("Talk to me")
+    with SNSbot:
 
-    # Initialize chat history
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-
-    # Display chat messages from history on app rerun
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+        #Predefined prompts
+        col1, col2, col3, col4 = st.columns([1,1,1,1])
+        with col1:
+            floodLoc = st.button("Flood warnings")
+        with col2:
+            roadsClosure = st.button("Find roads closure")
+        with col3:
+            evacuation = st.button("Evacuation orders")
+        with col4:
+            casualties = st.button("Human casualties")
         
-    if floodLoc == True:
-        hard_prompt = "Which locations received a flood warning?"
-        st_input = hard_prompt
-    if roadsClosure == True:
-        st_input = "Is there mention of closure of roads? If yes which roads/highways are shut down due to flooding?"
-    if evacuation == True:
-        st_input = "Which locations have evacuation orders?"
-    if casualties == True:
-        st_input = "Reported deaths due to flood?"
 
-    # React to user input
-    if prompt := st_input:
-        # Display user message in chat message container
-        with st.chat_message("user"):
-            st.markdown(prompt)
-            # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": prompt})
+        st_input = st.chat_input("Talk to me")
 
-        # Display assistant response in chat message container
-        with st.chat_message("assistant"):
-            with st.spinner():
-                langChain_analysis = LangChain_analysis(_dataPath = dataPath,
-                            _dateFrom = start_date,
-                            _dateTo = end_date)
-                #Chatbot response
-                response = langChain_analysis.predictions_response(prompt, eModel, rType, rerank, k, llm_model)['result']
-                st.markdown(response)
+        # Initialize chat history
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
 
-        # Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": response})
+        # Display chat messages from history on app rerun
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+            
+        if floodLoc == True:
+            hard_prompt = "Which locations have received flood warnings?"
+            st_input = hard_prompt
+        if roadsClosure == True:
+            st_input = "Is there mention of closure of roads? If yes which roads/highways are shut down due to flooding?"
+        if evacuation == True:
+            st_input = "Which locations have received evacuation orders?"
+        if casualties == True:
+            st_input = "Have any deaths or injuries been reported?"
 
+        # React to user input
+        if prompt := st_input:
+            # Display user message in chat message container
+            with st.chat_message("user"):
+                st.markdown(prompt)
+                # Add user message to chat history
+            st.session_state.messages.append({"role": "user", "content": prompt})
 
+            # Display assistant response in chat message container
+            with st.chat_message("assistant"):
+                with st.spinner():
+                    langChain_analysis = LangChain_analysis(_dataPath = dataPath,
+                                _dateFrom = start_date,
+                                _dateTo = end_date)
+                    #Chatbot response
+                    response = langChain_analysis.predictions_response(prompt, eModel, rType, rerank, k, llm_model)
+                    # contexts = []
+                    # contexts.append([docs.page_content for docs in response['source_documents']])
+                    # tweets_df = pd.DataFrame(contexts, columns=['Tweets'])
+
+                    st.markdown(response['result'])
+
+            # Add assistant response to chat history
+            st.session_state.messages.append({"role": "assistant", "content": response['result']})
+            
+
+    with Data:
+        # contexts = []
+        if response:
+            pd.set_option('display.max_colwidth', None)
+            tweets_df = pd.DataFrame([docs.page_content for docs in response['source_documents']], columns=["Tweets"])
+            st.dataframe(tweets_df)
+
+            # st.text(response['source_documents'])
 
 
 

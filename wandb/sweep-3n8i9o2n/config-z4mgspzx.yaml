@@ -1,0 +1,14 @@
+wandb_version: 1
+
+Analysis_question:
+  value: Which locations are at risk of evacuation?
+Cross_Encoder_rerank:
+  value: 'No'
+LLM:
+  value: Llama-3-8b-chat-hf
+Retrieval_distance_metric:
+  value: L2
+Retrieval_type:
+  value: Query
+k:
+  value: 30

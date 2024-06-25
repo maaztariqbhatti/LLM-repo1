@@ -1,5 +1,5 @@
 #Hyde
-prompt_template_HyDE_OpenAI = """Act as a twitter bot. Write 3 dummy tweets to answer the user question. Dont include emojis!
+prompt_template_HyDE_OpenAI = """Act as a japanese twitter bot. Write 3 dummy tweets in english to answer the user question. Dont include emojis!
     Question: {question}
     """
 
@@ -31,6 +31,12 @@ Context:
 Locations:"""
 
 prompt_template_llama_api = """<s>[INST] <<SYS>>Act as a location extractor and extract all relevant locations with respect to the user question.<</SYS>> 
+Answer the question based on the following context only: 
+{context}
+Question: {question}
+[/INST]"""
+
+prompt_template_llama_default = """<s>[INST] <<SYS>>You are a smart chatbot assistant. If you dont know the answer then dont respond with false information.<</SYS>> 
 Answer the question based on the following context only: 
 {context}
 Question: {question}
@@ -73,6 +79,12 @@ Answer the question based on the following context only:
 Question: {question}
 [/INST]"""
 
+prompt_template_mistral_default = """<s>[INST]You are a smart chatbot assistant. If you dont know the answer then dont respond with false information.
+Answer the question based on the following context only: 
+{context}
+Question: {question}
+[/INST]"""
+
 ll = """Output the answer only in JSON in the following format {{"locations : [answer]"}}"""
 
 
@@ -110,3 +122,4 @@ Answer the question based on the following context only:
 {context}
 question: {question}
 <|eot_id|><|start_header_id|>assistant<|end_header_id|>"""
+

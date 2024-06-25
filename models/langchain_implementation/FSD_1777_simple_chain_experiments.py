@@ -1,0 +1,638 @@
+import os
+from langchain_openai import OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
+from langchain.llms import openai
+from langchain.chains import LLMChain, LLMRouterChain, MultiPromptChain, HypotheticalDocumentEmbedder, RetrievalQA
+import dotenv
+from langchain_core.prompts import PromptTemplate
+from typing import Optional
+import json
+import pandas as pd
+from Text_preprocessing import Text_preprocessing
+from langchain_community.document_loaders import DataFrameLoader
+from typing import List, Dict, Any, Mapping
+from langchain.globals import set_debug
+
+from langchain.chains.router.multi_prompt_prompt import MULTI_PROMPT_ROUTER_TEMPLATE
+
+from langchain_community.vectorstores import chroma as Chroma
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+from langchain_core.vectorstores import VectorStoreRetriever
+from pydantic.v1 import Field
+from langchain_core.documents import Document
+from langchain_community.document_transformers import (
+    LongContextReorder
+)
+from sentence_transformers import CrossEncoder
+import datetime
+from datasets import Dataset
+from ragas import evaluate
+from ragas.metrics import (
+    faithfulness,
+    answer_relevancy,
+    context_recall,
+    context_precision,
+    context_relevancy,
+    answer_correctness,
+    answer_similarity,
+    context_entity_recall
+)
+import llmModels 
+import wandb
+import pickle
+import prompts
+import groundTruths
+from langchain.embeddings import SentenceTransformerEmbeddings
+from FlagEmbedding import FlagReranker
+
+dotenv.load_dotenv()
+
+### PARAMETER CHECKPOINT ####
+
+#Open AI
+chatModelAI = ChatOpenAI(temperature=0)
+
+# # # # Llama 2 13 B chat
+# chatModel_llama13b = llmModels.loadLlamma()
+
+# # # Mistral 7B chat
+# chatModel_mistral7b = llmModels.loadMistral7b() 
+
+# #70B
+chatModel_llama70b = llmModels.loadLlama2_70B()
+
+## Llama 3 8B
+# chatModel_llama3_8B = llmModels.loadLlama3_8B() 
+
+##FSD_1777
+dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/FSD1777_Oct23.json"
+dateFrom = "2023-10-19T09:00:00+00:00" #2023-10-19T18:58:41Z for 200 tweets
+dateTo = "2023-10-19T18:00:00+00:00"
+
+#FSD_1555
+# dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/fsd_1555_0601_06_15.pkl"
+# dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/fsd_1555_Japan_06_15.pkl"
+# dateFrom = "2023-06-01 06:00:00+00:00" 
+# dateTo = "2023-06-01 13:00:00+00:00" 
+
+"""Load relevant fields of flood tags api json response"""
+def dataframe_dataloader(dataPath = dataPath, dateFrom = dateFrom, dateTo = dateTo):
+    # Loading pandas dataframe from picke file
+    with open(dataPath, 'rb') as f:
+        data = pickle.load(f)
+
+    df = pd.DataFrame(data)
+    df['date'] = pd.to_datetime(df['date'])
+    # df = df.drop(columns=['id','tag_class', 'source', 'lang', 'urls','locations'])
+
+    #Get data between thresholds
+    threshold_datetime_lower = pd.to_datetime(dateFrom)
+    threshold_datetime_upper = pd.to_datetime(dateTo)
+    df = df[df['date'] >= threshold_datetime_lower]
+    df = df[df['date'] <= threshold_datetime_upper]
+
+    #Remove duplicates
+    # df  = df.drop_duplicates(subset=["text"], keep=False)
+    
+    #Covert date to string
+    df['date'] = df['date'].astype(str)
+    return df
+
+class CustomRetriever(VectorStoreRetriever):
+    """Implements re ranking of retriever output using cross encoder"""
+    vectorstore: VectorStoreRetriever
+    search_type: str = "similarity"
+    search_kwargs: dict = Field(default_factory=dict)
+
+    def get_relevant_documents(self, query: str) -> List[Document]:
+
+        docs = self.vectorstore.get_relevant_documents(query=query)
+
+        # Cross encoder re ranking 
+        cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+
+        pairs = []
+        for doc in docs:
+            pairs.append([query, doc.page_content])
+        scores = cross_encoder.predict(pairs)
+
+        i = 0
+        #Add scores to document
+        for doc in docs:
+            doc.metadata["cross-encoder_score"] = scores[i]
+            i = i+1
+        #Sort documents according to score
+        sorted_docs = sorted(docs, key=lambda doc: doc.metadata.get('cross-encoder_score'), reverse=True)
+
+        # #Remove 10 worst performing docs from the list 
+        # sorted_docs = sorted_docs[:-5]
+
+        #Re order according to long text re-order (Important context in start and end)
+        reordering = LongContextReorder()
+        reordered_docs = reordering.transform_documents(sorted_docs)
+
+        #Remove cross encoder score so re ordered context is back to its orignal form
+        for doc in reordered_docs:
+            doc.metadata.pop("cross-encoder_score")
+        return reordered_docs
+
+class Custom_ja_Retriever(VectorStoreRetriever):
+    """Implements re ranking of retriever output using cross encoder"""
+    vectorstore: VectorStoreRetriever
+    search_type: str = "similarity"
+    search_kwargs: dict = Field(default_factory=dict)
+
+    def get_relevant_documents(self, query: str) -> List[Document]:
+        """Extract relevant records using japanese embedding model"""
+
+        #Translate query to japanese 
+        # query_ja = llmModels.bulk_translation(query, source_lan = "en_XX", output_lan= "ja_XX")
+        # query = query_ja[0]
+
+        #Retrieve japanese records
+        docs = self.vectorstore.get_relevant_documents(query=query)
+
+        ### Cross encoder re ranking --------------------------------------------------------------------
+        # cross_encoder = FlagReranker('BAAI/bge-reranker-v2-m3', use_fp16=True)
+
+        # pairs = []
+        # for doc in docs:
+        #     pairs.append([query, doc.page_content])
+        # scores = cross_encoder.compute_score(pairs)
+
+        # i = 0
+        # #Add scores to document
+        # for doc in docs:
+        #     doc.metadata["cross-encoder_score"] = scores[i]
+        #     i = i+1
+        # #Sort documents according to score
+        # sorted_docs = sorted(docs, key=lambda doc: doc.metadata.get('cross-encoder_score'), reverse=True)
+
+        # #Remove 20 worst performing docs from the list 
+        # sorted_docs = sorted_docs[:60]
+
+        # # #Re order according to long text re-order (Important context in start and end)
+        # # reordering = LongContextReorder()
+        # # reordered_docs = reordering.transform_documents(sorted_docs)
+
+        # #Remove cross encoder score so re ordered context is back to its orignal form
+        # for doc in sorted_docs:
+        #     doc.metadata.pop("cross-encoder_score")
+
+        # #Change updated docs back to docs
+        # docs = sorted_docs
+        ### --------------------------------------------------------------------------------------------------
+
+        # TRANLATION
+        #For quick translation 
+        dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/fsd_1555_Japan_06_15.pkl"
+        df_ja = dataframe_dataloader(dataPath=dataPath)
+        dataPath = "/home/mbhatti/mnt/d/LLM-repo1/models/langchain_implementation/fsd_1555_0601_06_15.pkl"
+        df_en = dataframe_dataloader(dataPath=dataPath)
+
+        ##Extract japanese tweet texts 
+        tweets_JA = []
+        for doc in docs:
+            tweets_JA.append(doc.page_content)
+
+        #Translate text feild to english
+        # docs_en = llmModels.bulk_translation(tweets_JA)
+        #Get index of these extracted tweets
+        indexes = []
+        for tweet in tweets_JA:
+            indexes.append(df_ja[df_ja['text'] ==tweet].index[0])
+
+        #Extract english from exact location
+        docs_en = df_en.loc[indexes].text.to_list()
+
+        #Chnage text to english 
+        ind = 0
+        for doc in docs:
+            doc.page_content = docs_en[ind]
+            ind = ind+1
+        #------------------------------------------------------------------------------------------------------
+
+        return docs
+
+"""Load relevant fields of flood tags api json response"""
+def json_dataloader(dataPath = dataPath, dateFrom = dateFrom, dateTo = dateTo):
+    # Load json and extract relevant records in pandas df
+    with open(dataPath, 'r') as json_file:
+        response_dict = json.load(json_file)
+
+    # Convert to pandas df    
+    pd.set_option('display.max_colwidth', None)
+    df = pd.DataFrame(response_dict)
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.drop(columns=['id','tag_class', 'source', 'lang', 'urls','locations'])
+
+    #Get data between thresholds
+    threshold_datetime_lower = pd.to_datetime(dateFrom)
+    threshold_datetime_upper = pd.to_datetime(dateTo)
+    df = df[df['date'] >= threshold_datetime_lower]
+    df = df[df['date'] <= threshold_datetime_upper]
+
+    #Remove duplicates
+    df  = df.drop_duplicates(subset=["text"], keep=False)
+    #Pre-process
+    preprocess = Text_preprocessing(df)
+    df = preprocess.preprocess()
+    #Covert date to string
+    df['date'] = df['date'].astype(str)
+    return df
+
+def bgeEmbeddings():
+    model_name = "BAAI/bge-large-en-v1.5"
+    # model_name = "BAAI/bge-m3"
+    model_kwargs = {'device': 'cuda'}
+    encode_kwargs = {'normalize_embeddings': True} # set True to compute cosine similarity
+    model = HuggingFaceBgeEmbeddings(
+        model_name=model_name,
+        model_kwargs=model_kwargs,
+        encode_kwargs=encode_kwargs
+    )
+    return model
+
+
+
+def hydeEmbedder(embeddingsModel):
+    
+    model = chatModelAI
+    prompt_template  = prompts.prompt_template_HyDE_OpenAI
+    prompt = PromptTemplate(input_variables=["question"], template= prompt_template)
+    llm_chain_hyde  = LLMChain(llm = model, prompt=prompt)
+
+    embeddings = HypotheticalDocumentEmbedder(llm_chain=llm_chain_hyde,
+                                                base_embeddings=embeddingsModel,
+                                                verbose=True)
+    return embeddings
+
+def multiGen_hydeEmbedder(embeddingsModel):
+    multi_llm = openai.OpenAI(n=4, best_of=4)
+#
+    embeddings = HypotheticalDocumentEmbedder.from_llm(
+        multi_llm, embeddingsModel, "web_search"
+    )
+    return embeddings
+
+def japaneseEmbedding_glucose():
+    model = SentenceTransformerEmbeddings(model_name="pkshatech/GLuCoSE-base-ja")
+    return model
+
+def data_embedding(data : list, eModel = "bge-large-en-v1.5", rType = "Query", metric = "L2", lang = "ja"):
+    """Vectorize the data using OpenAI embeddings and store in Chroma db"""
+    if lang == "en":
+        if eModel != "bge-large-en-v1.5":
+            embeddings = OpenAIEmbeddings()
+        else:
+            embeddings = bgeEmbeddings()
+        
+        if (rType == "Hyde"):
+            embeddings = hydeEmbedder(embeddings)
+
+    if lang == "ja":
+        embeddings = bgeEmbeddings()
+
+
+    documents = []
+    loader = DataFrameLoader(data, page_content_column="text")
+    documents.extend(loader.load())
+
+    #Change this -- removal of duplicates
+    db = Chroma.Chroma.from_documents(documents,embeddings)
+    if db._client.list_collections() != None:
+        for collection in db._client.list_collections():
+            ids = collection.get()['ids']
+            print('REMOVE %s document(s) from %s collection' % (str(len(ids)), collection.name))
+            if len(ids): collection.delete(ids)
+
+    #Create a vector store
+    if metric == "cosine":
+        db = Chroma.Chroma.from_documents(documents,embeddings, collection_metadata={"hnsw:space": "cosine"})
+    else:
+        db = Chroma.Chroma.from_documents(documents,embeddings)
+    print(len(db._collection.get()['ids']))
+    return db
+
+"""For running a single query"""
+def predictions_response(question, eModel = "bge-large-en-v1.5", rType = "Query", rerank = False,k = 60, lang = "en"):
+    
+    #  LLM initialisation
+    model = chatModel_llama3_8B
+
+    # Load the data from source
+    data = dataframe_dataloader()
+
+    # ### remove brechin
+    # import spacy
+    # # Load the English language model
+    # nlp = spacy.load("en_core_web_lg")
+    # #Implementation on the dataframe
+    # # Predefined list of entities to match
+    # predefined_entities = ["Brechin"]
+
+    # # Function to extract entities from text
+    # def extract_entities(text):
+    #     doc = nlp(text)
+    #     return [ent.text for ent in doc.ents]
+
+    # # Iterate over the DataFrame and delete rows if entities match
+    # for index, row in data.iterrows():
+    #     entities = extract_entities(row["text"])
+    #     if any(entity in predefined_entities for entity in entities):
+    #         data.drop(index, inplace=True)
+
+
+    # Loading pandas dataframe from picke file
+    # data = dataframe_dataloader()
+
+    # Convert to vector store
+    vectorstore = data_embedding(data, eModel= eModel, rType= rType, lang = lang)
+    
+    # #Convert japanese tweets to english after retrieval
+    # if lang == "ja":
+    #     retriever = Custom_ja_Retriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k}))
+
+    if lang == "en":
+        # Get retriever
+        if rerank == True:
+            retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k}))
+        else:
+            retriever = vectorstore.as_retriever(search_kwargs={'k': k})
+    
+    if lang == "ja":
+        retriever = Custom_ja_Retriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k}))
+
+
+    default_prompt = PromptTemplate(template = prompts.prompt_template_llama3_loc, input_variables = ['question', 'context'])
+    default_chain = RetrievalQA.from_chain_type(llm = model,
+                            chain_type='stuff',
+                            retriever=retriever,
+                            chain_type_kwargs={"prompt": default_prompt},
+                            return_source_documents=True
+                            )
+    
+    ans = default_chain.invoke(question)
+    print(ans['query'])
+    print(ans['result'])
+    print(ans['source_documents'])
+
+def train_sweeps(config = None):
+
+    with wandb.init(config=config):
+
+        config = wandb.config
+         
+        # # Load the data from source
+        data = json_dataloader()
+
+        # Load the data from source - FSD 1555
+        # data = dataframe_dataloader()
+
+        # Loading pandas dataframe from picke file
+        # data = dataframe_dataloader()
+
+        #L2 or cosine distance metric
+        retrieval_distance_metric = config.Retrieval_distance_metric
+    
+        # Convert to vector store
+        if (config.Retrieval_type == "HYDE"):
+            vectorstore = data_embedding(data, rType="Hyde", metric= retrieval_distance_metric)
+        else:
+            vectorstore = data_embedding(data, metric= retrieval_distance_metric)
+
+        # Get retriever
+        if config.Cross_Encoder_rerank == "Yes":
+            retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': config.k}))
+        else:
+            retriever = vectorstore.as_retriever(search_kwargs={'k': config.k})
+
+
+        #  LLM initialisation
+        if (config.LLM == "Llama-2-13b-chat-hf"):
+            model = chatModel_llama13b  
+            default_prompt = PromptTemplate(template = prompts.prompt_template_llama_api, input_variables = ['question', 'context'])
+
+        if (config.LLM == "Mistral-7B-Instruct-v0.2"):
+            model = chatModel_mistral7b
+            default_prompt = PromptTemplate(template = prompts.prompt_template_mistral, input_variables = ['question', 'context'])
+
+        if (config.LLM == "Llama-2-70b-chat-hf"):
+            model = chatModel_llama70b  
+            default_prompt = PromptTemplate(template = prompts.prompt_template_llama_api, input_variables = ['question', 'context'])
+        
+        if (config.LLM == "Llama-3-8b-chat-hf"):
+            model = chatModel_llama3_8B
+            default_prompt = PromptTemplate(template = prompts.prompt_template_llama3_loc, input_variables = ['question', 'context'])
+
+        #Open AI template
+        # default_prompt_template = """Answer the question based only on the following tweet's context: {context}
+        # Question: {question}"""
+
+        
+        default_chain = RetrievalQA.from_chain_type(llm = model,
+                                chain_type='stuff',
+                                retriever=retriever,
+                                chain_type_kwargs={"prompt": default_prompt},
+                                return_source_documents=True
+                                )
+        
+        #Evaluation using RAGAS---------------------------------------------------
+        questions = []
+        questions.append(config.Analysis_question)
+        answers = []
+        contexts = []
+
+        # Inference 
+        for query in questions:
+            response = default_chain.invoke(query)
+            answers.append(response['result'])
+            contexts.append([docs.page_content for docs in response['source_documents']])
+
+        #FSD_XXXX
+        ground_truths = [groundTruths.gt_FSD1777_peak_fw]
+
+        # To dict
+        data = {
+            "question": questions,
+            "answer": answers,
+            "contexts": contexts,
+            "ground_truths": ground_truths
+        }
+
+        # Convert dict to dataset
+        dataset = Dataset.from_dict(data)
+
+        RAG_response = wandb.Table(columns=["Query", "Response", "Context"], data=[[questions, answers, contexts]])
+
+        #Metrics to eval on
+        if (config.k <= 30):
+            metrics = [answer_correctness, context_entity_recall]
+
+            result = evaluate(
+            dataset = dataset, 
+            metrics= metrics 
+            )
+
+            wandb.log({"GPT_f1_score": result['answer_correctness'],
+                    "GPT_context_entity_recall": result['context_entity_recall'],
+                        "RAG response": RAG_response
+                    })
+        else:
+            if (config.k < 60):
+                metrics = [answer_correctness]
+
+                result = evaluate(
+                dataset = dataset, 
+                metrics= metrics 
+                )
+
+                wandb.log({"GPT_f1_score": result['answer_correctness'],
+                            "RAG response": RAG_response
+                        })
+            else:
+                wandb.log({"RAG response": RAG_response})
+
+
+"""Run experiments"""
+def run_sweep():
+    # # 1. Sweep configurations
+    sweep_config = {
+        'method': 'grid'
+    }
+
+    for i in range(5):
+
+        parameters_dict = {
+        'k': {
+            'values': [20]
+            },
+        'LLM': {
+            'values': ["Llama-2-70b-chat-hf"]  #"Llama-2-13b-chat-hf"   # "Llama-2-70b-chat-hf" # "Llama-3-8b-chat-hf" #"Mistral-7B-Instruct-v0.2"
+            },
+        'Cross_Encoder_rerank': {
+            'values' : ["No"]
+            },
+        'Retrieval_type': {
+            'values' : ["Query"]
+        },
+        'Retrieval_distance_metric': {
+            'values' : ["L2"]
+        },
+        'Analysis_question': {
+        'values' : ["Which locations have received evacuation orders due to Storm Babet?"]
+        }
+        }
+
+        sweep_config['parameters'] = parameters_dict  
+        #Initialise sweep
+        sweep_id = wandb.sweep(sweep_config, project="FFSD_1777_Human_Eval_EO") #FW_1777_AER_LongContext_LLMs #FFSD_1777_Human_Eval
+        wandb.agent(sweep_id, train_sweeps)
+
+    for i in range(5):
+
+        parameters_dict = {
+        'k': {
+            'values': [40]
+            },
+        'LLM': {
+            'values': ["Llama-2-70b-chat-hf"] #"Llama-2-13b-chat-hf"   # "Llama-2-70b-chat-hf" # "Llama-3-8b-chat-hf" #"Mistral-7B-Instruct-v0.2"
+            },
+        'Cross_Encoder_rerank': {
+            'values' : ["No"]
+            },
+        'Retrieval_type': {
+            'values' : ["Query"]
+        },
+        'Retrieval_distance_metric': {
+            'values' : ["L2"]
+        },
+        'Analysis_question': {
+        'values' : ["Which locations have received evacuation orders due to Storm Babet?"]
+        }
+        }
+
+        sweep_config['parameters'] = parameters_dict  
+        #Initialise sweep
+        sweep_id = wandb.sweep(sweep_config, project="FFSD_1777_Human_Eval_EO") #FW_1777_AER_LongContext_LLMs #FFSD_1777_Human_Eval
+        wandb.agent(sweep_id, train_sweeps)
+
+    # for i in range(2):
+
+    #     parameters_dict = {
+    #     'k': {
+    #         'values': [50]
+    #         },
+    #     'LLM': {
+    #         'values': ["Llama-2-70b-chat-hf"] #"Llama-2-13b-chat-hf"   # "Llama-2-70b-chat-hf" # "Llama-3-8b-chat-hf" #"Mistral-7B-Instruct-v0.2"
+    #         },
+    #     'Cross_Encoder_rerank': {
+    #         'values' : ["No"]
+    #         },
+    #     'Retrieval_type': {
+    #         'values' : ["Query"]
+    #     },
+    #     'Retrieval_distance_metric': {
+    #         'values' : ["L2"]
+    #     },
+    #     'Analysis_question': {
+    #     'values' : ["Which locations are receiving flood warnings?"]
+    #     }
+    #     }
+
+    #     sweep_config['parameters'] = parameters_dict  
+    #     #Initialise sweep
+    #     sweep_id = wandb.sweep(sweep_config, project="FSD_1777_Human_Eval_FW_P2") #FW_1777_AER_LongContext_LLMs #FFSD_1777_Human_Eval
+    #     wandb.agent(sweep_id, train_sweeps)
+
+    # for i in range(5):
+
+    #     parameters_dict = {
+    #     'k': {
+    #         'values': [60]
+    #         },
+    #     'LLM': {
+    #         'values': ["Llama-2-13b-chat-hf"] #"Llama-2-13b-chat-hf"   # "Llama-2-70b-chat-hf" # "Llama-3-8b-chat-hf" #"Mistral-7B-Instruct-v0.2"
+    #         },
+    #     'Cross_Encoder_rerank': {
+    #         'values' : ["No"]
+    #         },
+    #     'Retrieval_type': {
+    #         'values' : ["Query"]
+    #     },
+    #     'Retrieval_distance_metric': {
+    #         'values' : ["L2"]
+    #     },
+    #     'Analysis_question': {
+    #     'values' : ["Which locations are likely to receive flood warnings due to heavy rain?"]
+    #     }
+    #     }
+
+    #     sweep_config['parameters'] = parameters_dict  
+    #     #Initialise sweep
+    #     sweep_id = wandb.sweep(sweep_config, project="FSD_1555_Human_Eval_FloodWarn") #FW_1777_AER_LongContext_LLMs #FFSD_1777_Human_Eval
+    #     wandb.agent(sweep_id, train_sweeps)
+
+if __name__ == "__main__":
+
+    # prompt = """どの場所が洪水警告を受けていますか?"""
+    # prompt = "Which locations are at risk of evacuation?"
+    # predictions_response(prompt, lang = 'ja', k = 100)
+
+    run_sweep()
+
+                                                    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
