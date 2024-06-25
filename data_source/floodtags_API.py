@@ -96,16 +96,6 @@ class FloodTagConfig:
                          self.user_export_end_point):
             assert isinstance(end_point, str), 'Expected all endpoints to be strings but a %s was input.'%type(end_point)
 
-        #assert isinstance(self.sources, list), 'Expected input "sources" to be a list, but a %s was input.'%type(self.source)
-        #assert isinstance(self.flood_classes, list), 'Expected input "flood_classes" to be a list, but a %s was input.'%type(self.flood_classes)
-
-        #assert len(self.sources) > 0, 'Expected input "sources" to be a list of strings, but an empty list was input.'
-        #assert len(self.flood_classes) > 0, 'Expected input "flood_classes" to be a list of strings, but an empty list was input.'
-
-        # for item in self.sources:
-        #     assert isinstance(item, str), 'Expected input "sources" to be a list of strings, but a %s element was found.'%type(item)
-        # for item in self.flood_classes:
-        #     assert isinstance(item, str), 'Expected input "flood_classes" to be a list of strings, but a %s element was found.'%type(item)
 
         assert isinstance(self.request_timeout_limit_seconds, int), 'Expected input "request_timeout_limit_seconds" to be an integer, but a %s was input.'%type(self.request_timeout_limit_seconds)
         assert self.request_timeout_limit_seconds > 0, 'Expected input "request_timeout_limit_seconds" to be a positive integer, but a %s was input.'%self.request_timeout_limit_seconds
@@ -116,11 +106,7 @@ class FloodTagConfig:
             assert isinstance(item, (int, float)), 'Expected each element in input "query_intervals" to be either an integer or a float but a %s was found'%type(item)
             assert item >= 0.0, 'Expected each element in input "query_intervals" to be greater or equal to zero.'
 
-        # dotenv.load_dotenv()
-        # if flood_tag_api_key := os.getenv("FLOOD_TAG_API_KEY"):
-        #     self.flood_tag_api_key : str = flood_tag_api_key
-        # else:
-        #     raise Exception("Please specify the FLOOD_TAG_API_KEY env variable")
+
         self.flood_tag_api_key : str = "7b6f7181-fc27-4b64-a533-0c390927788d"
 class FloodTagsRetriever:
 
@@ -254,11 +240,6 @@ class FloodTagsRetriever:
                                                     aoi_geom=aoi_geom,
                                                     tags_paginator=tags_paginator + payload['view.tags.limit'])
 
-                # output['data']['tags'].extend(new_output['data']['tags'])
-                # output['total'] += new_output['total']
-                #self.stored_output.extend(new_output['data']['tags'])
-
-        # full_output = self.stored_output
 
         if aoi_geom_Oya is not None:
             self.stored_output = _drop_out_of_bounds_results(self.stored_output, aoi_geom_Oya)
@@ -321,10 +302,6 @@ if __name__ == "__main__":
     start_date  = datetime(2023, 6, 1)
     end_date = datetime(2023, 6, 2)
     sources = ["japanese-flood"]
-    
-
-    # flood_classes = ["class:flood-logistics",
-    #                  "class:flood-affected"]
     
     
     #Bounding box of the area of interest

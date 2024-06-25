@@ -1,30 +1,15 @@
-from langchain_community.document_loaders.csv_loader import CSVLoader
 import os
-from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
-from langchain.chains import ConversationChain, LLMChain, LLMRouterChain, MultiPromptChain, HypotheticalDocumentEmbedder, RetrievalQA
+from langchain.chains import LLMChain, RetrievalQA
 import dotenv
-from langchain import hub
-import langchainhub
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
+from langchain_core.prompts import  PromptTemplate
 from typing import Optional
 import json
 import pandas as pd
 from Text_preprocessing import Text_preprocessing
 from langchain_community.document_loaders import DataFrameLoader
-from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
-from langchain_core.runnables import RunnableParallel, RunnablePassthrough
-from pydantic.v1 import BaseModel
-from typing import List, Dict, Any, Mapping
-from langchain.globals import set_debug
-from langchain.chains.router.base import MultiRouteChain
-from langchain.chains.router.llm_router import LLMRouterChain, RouterOutputParser
-from langchain.chains.router.multi_prompt_prompt import MULTI_PROMPT_ROUTER_TEMPLATE
-from langchain.chains.base import Chain
-from langchain.callbacks.manager import (
-    CallbackManagerForChainRun,
-)
+from typing import List
 from langchain_community.vectorstores import chroma as Chroma
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from langchain_core.vectorstores import VectorStoreRetriever
@@ -39,14 +24,11 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import transformers
 from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
-import prompts
-import llmModels
 from langchain.chat_models import ChatOpenAI
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 from langchain.chains import RetrievalQA
 from langchain.agents import Tool
 from langchain.chains import LLMChain
-from langchain.agents import AgentExecutor
 from langchain.chains import LLMChain
 from langchain import PromptTemplate
 from langchain.chains import LLMChain
@@ -57,10 +39,11 @@ import geopandas as gpd
 from shapely.geometry import Point
 import folium
 import ast
-dataPath = "FSD1777_Oct23.json"
 
+dataPath = "FSD1777_Oct23.json"
 print(os.getcwd())
 
+#The decorator caches the model once loaded onto GPU memory
 @st.cache_resource
 #Llama3-8B-Chat
 def loadLlamma():
@@ -131,8 +114,6 @@ def loadOpenAI_gpt4o():
     return chatModelOpenAI4o
 
 #Load the models
-# torch.cuda.empty_cache()
-
 dotenv.load_dotenv()
 llm = loadLlamma()
 chatModelAI = ChatOpenAI()
@@ -263,21 +244,12 @@ def data_embedding(data : list, eModel, rType):
 
 
 def predictions_response(input_question, vectorstore, conversational_memory,rerank = False,k = 20):
-    # Load the data from source
-    # data = self.json_dataloader()
-
-    # # Convert to vector store
-    # vectorstore = self.data_embedding(data, eModel= eModel, rType= rType)
     
     #Get retriever
     if rerank == True:
         retriever = CustomRetriever(vectorstore=vectorstore.as_retriever(search_kwargs={'k': k+5}))
     else:
         retriever = vectorstore.as_retriever(search_kwargs={'k': k})
-
-
-    # system_prompt = sys_prompt
-    sp = "Act as a location extractor and extract all relevant locations with respect to the user question."
     
     # Prompt and chain for Twitter DB-----------------
     prompt_template_llama3_loc = """<|begin_of_text|><|start_header_id|>system<|end_header_id|>
@@ -374,6 +346,7 @@ if __name__ == "__main__":
     #Streamlit
     st.title("SNS early flood warning 🤖")
     response ={}
+
     #Side bar to select parameters
     with st.sidebar:
         
@@ -435,17 +408,6 @@ if __name__ == "__main__":
                 st.session_state.conversational_memory = conversational_memory
             
     choice = st.radio(label='', options=["Chat", "Data Review", "Map"], horizontal=True)
-    # if choice == 'Cat':
-    #     st.header("A cat")
-    #     st.image("_", width=200)
-
-    # elif choice == 'Dog':
-    #     st.header("A dog")
-    #     st.image("https://static.streamlit.io/examples/dog.jpg", width=200)
-
-    # elif choice == 'Owl':
-    #     st.header("An owl")
-    #     st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
 
     # with SNSbot:
     if choice == "Chat":
@@ -530,14 +492,6 @@ if __name__ == "__main__":
             tweets_df = pd.DataFrame([docs.page_content for docs in response1['source_documents']], columns=["Tweets"])
             st.dataframe(tweets_df)
 
-        # # contexts = []
-        # if response:
-        #     pd.set_option('display.max_colwidth', None)
-        #     tweets_df = pd.DataFrame([docs.page_content for docs in response['source_documents']], columns=["Tweets"])
-        #     st.dataframe(tweets_df)
-
-                # st.text(response['source_documents'])
-
     if choice == 'Map':
         
         if st.session_state.response['intermediate_steps'][0][0].tool == "Geo location extraction":
@@ -546,11 +500,6 @@ if __name__ == "__main__":
 
 
             data = st.session_state.response['intermediate_steps'][0][1]
-
-            # Clean and format the data
-            # formatted_data = data.replace("```json", "\"")
-            # formatted_data = formatted_data.replace("```", "\"")
-            # formatted_data = formatted_data.replace("\n", "")
 
             if '[' in data: 
                 formatted_data = data[data.find('['):data.find(']')]
@@ -576,10 +525,6 @@ if __name__ == "__main__":
                 print(type(x))
                 print(x)
                 df = pd.DataFrame(x, index=[0])
-
-            # x = ast.literal_eval(x)
-            # # # print(type(x))
-            # # data = json.loads(locations)
             
 
             # Convert latitude and longitude to geometry points

@@ -1,1 +1,2 @@
 /models/langchain_implementation/wandb
+*.env
