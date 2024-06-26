@@ -1,2 +1,4 @@
 /models/langchain_implementation/wandb
-*.env
+/models/langchain_implementation/.env
+/Floodtags_analytics/.env
+/data_source/.env
